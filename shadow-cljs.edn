@@ -1,0 +1,41 @@
+{:nrepl {:port 8765}
+
+ :deps {:aliases [:cljs :dev]}
+ :builds
+ {:app
+  {:target     :browser
+   :output-dir "resources/public/js/compiled"
+   :asset-path "/js/compiled"
+   :modules
+   {
+    :app
+    {
+      :init-fn snoqb.core/init!
+      :preloads [devtools.preload
+                 day8.re-frame-10x.preload.react-18
+                 ]
+    }
+   }
+   :devtools
+   {:http-port 8031
+    :preloads [devtools.preload]
+    :reload-strategy :full
+    :ignore-warnings true ;; To ignore lint warnings for some type-uncheckable code.
+    :watch-dir "resources/public/src"
+    :watch-path "/src"
+    }
+   :dev
+   ; For Re-frame-10x:
+   {:compiler-options
+    {:closure-defines
+     {re-frame.trace.trace-enabled?        true
+      day8.re-frame.tracing.trace-enabled? true
+      }
+     :external-config {
+       :devtools/config {
+         ;; Patch for https://github.com/binaryage/cljs-devtools/issues/81
+         :native-reference-wrapper-style  "position: relative; display: inline-flex; line-height: 0; margin-top: -1px;"
+       }
+     }
+   }}
+}}}

@@ -19,3 +19,7 @@ node_modules
 .editorconfig
 .cpcache
 **/*~
+.idea
+*.iml
+.shadow-cljs
+resources/public/js/compiled

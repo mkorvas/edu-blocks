@@ -10,7 +10,7 @@
    {
     :app
     {
-      :init-fn snoqb.core/init!
+      :init-fn edu-blocks.core/init!
       :preloads [devtools.preload
                  day8.re-frame-10x.preload.react-18
                  ]

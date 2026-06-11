@@ -4,7 +4,7 @@
 
   {:bky {
         ; :ws -- Blockly Workspace object
-        ; :json -- JSON repr of the Workspace, may be nil
+        ; :json -- serialized repr of the Workspace as keywordized cljs data, may be nil
         ; :observer -- ResizeObserver for the workspace container
         }
   })

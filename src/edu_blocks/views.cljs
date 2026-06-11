@@ -1,25 +1,18 @@
 (ns edu-blocks.views
   (:require
    ["blockly" :as b]
-   [re-com.core :refer [box gap h-box v-box input-text]]
+   [re-com.core :refer [h-box]]
    [re-frame.core :as rf]
 
+   [edu-blocks.blocks :as blocks]
    [edu-blocks.events :as ev]
    ))
 
-(def toolbox
-  ;; Placeholder built-in blocks, to be replaced by custom Bash blocks.
-  (clj->js
-   {:kind "flyoutToolbox"
-    :contents [{:kind "block" :type "controls_if"}
-               {:kind "block" :type "controls_repeat_ext"}
-               {:kind "block" :type "text"}]}))
-
 (def ws-config
   (clj->js
-   {:toolbox toolbox
-    :grid {:spacing 20 :length 3 :colour "#ccc" :snap true}
-    :zoom {:controls true}
+   {:toolbox  blocks/toolbox
+    :grid     {:spacing 20 :length 3 :colour "#ccc" :snap true}
+    :zoom     {:controls true}
     :trashcan true}))
 
 (defn- on-ws-change [^js ws]

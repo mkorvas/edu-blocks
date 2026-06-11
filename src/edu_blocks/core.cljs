@@ -6,6 +6,7 @@
    [reagent.core :as r]
    [re-frame.core :as rf]
 
+   [edu-blocks.blocks :as blocks]
    [edu-blocks.config :as config]
    [edu-blocks.events :as ev]
    [edu-blocks.views :as views]
@@ -33,4 +34,5 @@
 (defn init! []
   (rf/dispatch-sync [::ev/initialize-db])
   (dev-setup)
+  (blocks/define-blocks!)
   (mount-root))

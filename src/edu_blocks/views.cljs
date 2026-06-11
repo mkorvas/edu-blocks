@@ -6,6 +6,7 @@
 
    [edu-blocks.blocks :as blocks]
    [edu-blocks.events :as ev]
+   [edu-blocks.subs :as subs]
    ))
 
 (def ws-config
@@ -39,14 +40,24 @@
         (.dispose ws)))))
 
 (defn blockly-pane []
-  [:div {:style {:flex "1 1 auto" :height "100%"}
+  [:div {:style {:flex "1 1 auto" :height "100%" :min-width 0}
          :ref inject-blockly!}])
+
+(defn output-panel []
+  (let [code @(rf/subscribe [::subs/bash-output])]
+    [:div {:style {:flex         "0 0 300px"
+                   :height       "100%"
+                   :overflow-y   "auto"
+                   :background   "#1e1e1e"}}
+     [:pre {:style {:margin      0
+                    :padding     "12px"
+                    :color       "#d4d4d4"
+                    :font-family "monospace"
+                    :white-space "pre"}}
+      (or code "# Drop a script block\n# to get started")]]))
 
 (defn main-panel []
   [h-box
-   :style {:height "100vh"
-           :width "100%"}
-   :children [
-              [blockly-pane]
-              ]]
-  )
+   :style {:height "100vh" :width "100%"}
+   :children [[blockly-pane]
+              [output-panel]]])

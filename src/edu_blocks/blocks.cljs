@@ -15,18 +15,35 @@
      :previousStatement nil
      :nextStatement     nil
      :colour            160}
+    {:type              "bash_for"
+     :message0          "for %1 in %2"
+     :args0             [{:type "field_input" :name "VAR" :text "i"}
+                         {:type "input_value" :name "LIST" :check "WordList"}]
+     :message1          "do %1"
+     :args1             [{:type "input_statement" :name "BODY"}]
+     :inputsInline      true
+     :previousStatement nil
+     :nextStatement     nil
+     :colour            120}
     {:type    "bash_string"
      :message0 "\"%1\""
      :args0   [{:type "field_input" :name "TEXT" :text "hello"}]
      :output  "String"
-     :colour  160}]))
+     :colour  160}
+    {:type    "bash_words"
+     :message0 "words %1"
+     :args0   [{:type "field_input" :name "WORDS" :text "a b c"}]
+     :output  "WordList"
+     :colour  20}]))
 
 (def toolbox
   (clj->js
    {:kind     "flyoutToolbox"
     :contents [{:kind "block" :type "bash_script"}
                {:kind "block" :type "bash_echo"}
-               {:kind "block" :type "bash_string"}]}))
+               {:kind "block" :type "bash_for"}
+               {:kind "block" :type "bash_string"}
+               {:kind "block" :type "bash_words"}]}))
 
 (defn define-blocks! []
   (-> configs

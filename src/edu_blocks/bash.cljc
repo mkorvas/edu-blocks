@@ -7,6 +7,8 @@
 (def block-defs
   {"bash_script" {:stmts  [:STMTS]}
    "bash_echo"   {:fields [:NEWLINE] :inputs [:VALUE]}
+   "bash_for"    {:fields [:VAR] :inputs [:LIST] :stmts [:BODY]}
+   "bash_words"  {:fields [:WORDS]}
    "bash_string" {:fields [:TEXT]}})
 
 (declare bky-block->ast)
@@ -60,8 +62,24 @@
        (when (false? (:NEWLINE args)) "-n ")
        (emit (:VALUE args))))
 
+(defn- indent [s]
+  (->> (str/split-lines s)
+       (map #(str "  " %))
+       (str/join "\n")))
+
+(defmethod emit "bash_for" [{:keys [args]}]
+  (let [body (if (seq (:BODY args))
+               (str/join "\n" (map emit (:BODY args)))
+               ":")]
+    (str "for " (:VAR args) " in " (emit (:LIST args)) "; do\n"
+         (indent body)
+         "\ndone")))
+
 (defmethod emit "bash_string" [{:keys [args]}]
   (str "\"" (:TEXT args) "\""))
+
+(defmethod emit "bash_words" [{:keys [args]}]
+  (:WORDS args))
 
 (defmethod emit :default [{:keys [type]}]
   (str "# unknown block: " type))

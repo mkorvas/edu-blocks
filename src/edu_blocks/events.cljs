@@ -25,3 +25,21 @@
  ::ws-disposed
  (fn [db _]
    (update db :bky dissoc :ws :observer)))
+
+(rf/reg-event-db
+ ::set-lang
+ (fn [db [_ lang]]
+   (assoc db :lang lang)))
+
+(defn bky-js->clj [bky]
+  (cond
+    (array? bky)
+    (mapv bky-js->clj bky)
+    (string? bky)
+    bky
+    (nil? bky)
+    bky
+    (seq (js/Object.keys bky))
+    (into {} (map (fn [[k v]] [(keyword k) (bky-js->clj v)])
+                  (js/Object.entries bky)))
+    :else bky))

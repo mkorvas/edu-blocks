@@ -2,7 +2,8 @@
 
 (def default-db
 
-  {:bky {
+  {:lang :bash ; the output language, :bash or :js
+   :bky {
         ; :ws -- Blockly Workspace object
         ; :json -- serialized repr of the Workspace as keywordized cljs data, may be nil
         ; :observer -- ResizeObserver for the workspace container

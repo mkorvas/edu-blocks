@@ -1,7 +1,7 @@
 (ns edu-blocks.views
   (:require
    ["blockly" :as b]
-   [re-com.core :refer [h-box]]
+   [re-com.core :refer [h-box horizontal-bar-tabs]]
    [re-frame.core :as rf]
 
    [edu-blocks.blocks :as blocks]
@@ -55,18 +55,33 @@
   [:div {:style {:flex "1 1 auto" :height "100%" :min-width 0}
          :ref inject-blockly!}])
 
+(def langs
+  [{:id :bash :label "Bash"}
+   {:id :js   :label "JavaScript"}])
+
 (defn output-panel []
-  (let [code @(rf/subscribe [::subs/bash-output])]
-    [:div {:style {:flex         "0 0 300px"
-                   :height       "100%"
-                   :overflow-y   "auto"
-                   :background   "#1e1e1e"}}
+  (let [lang @(rf/subscribe [::subs/lang])
+        code @(rf/subscribe [::subs/code-output])]
+    [:div {:style {:flex           "0 0 300px"
+                   :height         "100%"
+                   :display        "flex"
+                   :flex-direction "column"
+                   :background     "#1e1e1e"}}
+     [:div {:style {:padding "8px"}}
+      [horizontal-bar-tabs
+       :model     lang
+       :tabs      langs
+       :on-change #(rf/dispatch [::ev/set-lang %])]]
      [:pre {:style {:margin      0
                     :padding     "12px"
+                    :flex        "1 1 auto"
+                    :overflow-y  "auto"
                     :color       "#d4d4d4"
                     :font-family "monospace"
                     :white-space "pre"}}
-      (or code "# Drop a script block\n# to get started")]]))
+      (or code (case lang
+                 :js "// Drop a script block\n// to get started"
+                 "# Drop a script block\n# to get started"))]]))
 
 (defn main-panel []
   [h-box

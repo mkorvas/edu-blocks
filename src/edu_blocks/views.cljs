@@ -16,13 +16,25 @@
     :zoom     {:controls true}
     :trashcan true}))
 
+(defn bky-js->clj [bky]
+  (cond
+    (array? bky)
+      (mapv bky-js->clj bky)
+    (string? bky)
+      bky
+    (nil? bky)
+      bky
+    (seq (js/Object.keys bky))
+      (into {} (map (fn [[k v]] [(keyword k) (bky-js->clj v)])
+                    (js/Object.entries bky)))
+    :else bky))
+
 (defn- on-ws-change [^js ws]
   (fn [^js e]
     (when-not (or ^boolean (.-isUiEvent e)
                   (.isDragging ws))
       (rf/dispatch [::ev/ws-modified
-                    (js->clj (.save b/serialization.workspaces ws)
-                             :keywordize-keys true)]))))
+                    (bky-js->clj (.save b/serialization.workspaces ws))]))))
 
 (defn- inject-blockly!
   "React 19 ref callback: injects Blockly into the container element and

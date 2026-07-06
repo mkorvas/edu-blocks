@@ -15,6 +15,11 @@
    (:lang db)))
 
 (rf/reg-sub
+ ::exec-output
+ (fn [db _]
+   (:exec-output db)))
+
+(rf/reg-sub
  ::code-output
  (fn [db _]
    (let [emit (emitters (:lang db) bash/emit)]

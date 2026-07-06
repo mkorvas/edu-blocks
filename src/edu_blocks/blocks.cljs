@@ -8,8 +8,10 @@
      :args0       [{:type "input_statement" :name "STMTS"}]
      :colour      290}
     {:type              "bash_echo"
-     :message0          "echo %1"
-     :args0             [{:type "input_value" :name "VALUE" :check "String"}]
+     :message0          "echo %1 newline %2"
+     :args0             [{:type "input_value" :name "VALUE" :check "String"}
+                         {:type "field_checkbox" :name "NEWLINE" :checked true}]
+     :inputsInline      true
      :previousStatement nil
      :nextStatement     nil
      :colour            160}

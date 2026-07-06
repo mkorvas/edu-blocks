@@ -6,7 +6,7 @@
 ;; sequence of connected blocks via the :next chain).
 (def block-defs
   {"bash_script" {:stmts  [:STMTS]}
-   "bash_echo"   {:inputs [:VALUE]}
+   "bash_echo"   {:fields [:NEWLINE] :inputs [:VALUE]}
    "bash_string" {:fields [:TEXT]}})
 
 (declare bky-block->ast)
@@ -56,7 +56,9 @@
        (str/join "\n" (map emit (:STMTS args)))))
 
 (defmethod emit "bash_echo" [{:keys [args]}]
-  (str "echo " (emit (:VALUE args))))
+  (str "echo "
+       (when (false? (:NEWLINE args)) "-n ")
+       (emit (:VALUE args))))
 
 (defmethod emit "bash_string" [{:keys [args]}]
   (str "\"" (:TEXT args) "\""))

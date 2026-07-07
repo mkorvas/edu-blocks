@@ -4,6 +4,7 @@
 
     [edu-blocks.ast :as ast]
     [edu-blocks.db :as db]
+    [edu-blocks.fs :as fs]
     [edu-blocks.javascript :as javascript]
 ))
 
@@ -32,6 +33,11 @@
  ::set-lang
  (fn [db [_ lang]]
    (assoc db :lang lang)))
+
+(rf/reg-event-db
+ ::fs-uploaded
+ (fn [db [_ paths]]
+   (assoc db :fs-tree (fs/paths->tree paths))))
 
 (defn eval-js
   "Evaluates JS code with console.log and process.stdout.write redirected

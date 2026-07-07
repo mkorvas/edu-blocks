@@ -127,18 +127,35 @@
      [:i {:class "zmdi zmdi-file" :style {:color "#999"}}]
      " " (:name node)]))
 
+(defn- on-dir-upload [^js e]
+  (let [paths (mapv #(.-webkitRelativePath ^js %)
+                    (array-seq (.. e -target -files)))]
+    (when (seq paths)
+      (rf/dispatch [::ev/fs-uploaded paths]))))
+
 (defn files-panel []
   (let [tree @(rf/subscribe [::subs/fs-tree])]
-    [:div {:style {:flex        "0 0 250px"
-                   :height      "100%"
-                   :overflow    "auto"
-                   :padding     "12px"
-                   :background  "#f7f7f7"
-                   :border-left "1px solid #ddd"
-                   :font-family "monospace"
-                   :font-size   "14px"
-                   :line-height "1.6"}}
-     [tree-node tree]]))
+    [:div {:style {:flex           "0 0 250px"
+                   :height         "100%"
+                   :display        "flex"
+                   :flex-direction "column"
+                   :background     "#f7f7f7"
+                   :border-left    "1px solid #ddd"}}
+     [:div {:style {:padding "8px" :border-bottom "1px solid #ddd"}}
+      ;; Only file names/paths are read from the picked directory,
+      ;; never file contents.
+      [:input {:type            "file"
+               :webkitdirectory ""
+               :title           "Load a folder as the file tree"
+               :style           {:max-width "100%" :font-size "12px"}
+               :on-change       on-dir-upload}]]
+     [:div {:style {:flex        "1 1 auto"
+                    :overflow    "auto"
+                    :padding     "12px"
+                    :font-family "monospace"
+                    :font-size   "14px"
+                    :line-height "1.6"}}
+      [tree-node tree]]]))
 
 (defn main-panel []
   [h-box

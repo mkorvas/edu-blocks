@@ -57,6 +57,37 @@
      :inputsInline true
      :output       "Command"
      :colour       210}
+    {:type         "bash_cat"
+     :message0     "cat %1"
+     :args0        [{:type "input_value" :name "FILE" :check "String"}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Prints the contents of a file."
+     :colour       210}
+    {:type         "bash_head"
+     :message0     "head -n %1 %2"
+     :args0        [{:type "input_value" :name "N" :check ["Number" "String"]}
+                    {:type "input_value" :name "FILE" :check "String"}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Prints the first N lines of a file."
+     :colour       210}
+    {:type         "bash_grep"
+     :message0     "grep %1 %2"
+     :args0        [{:type "input_value" :name "PATTERN" :check "String"}
+                    {:type "input_value" :name "FILE" :check "String"}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Prints the lines of a file matching a pattern."
+     :colour       210}
+    {:type              "bash_run"
+     :message0          "run %1"
+     :args0             [{:type "input_value" :name "CMD" :check "Command"}]
+     :inputsInline      true
+     :previousStatement nil
+     :nextStatement     nil
+     :tooltip           "Runs a command and prints its output."
+     :colour            180}
     {:type              "bash_if"
      :message0          "if %1"
      :args0             [{:type "input_value" :name "COND" :check "Condition"}]
@@ -112,6 +143,21 @@
                 :type   "bash_seq"
                 :inputs {:FROM {:shadow {:type "bash_number" :fields {:NUM 1}}}
                          :TO   {:shadow {:type "bash_number" :fields {:NUM 10}}}}}
+               {:kind   "block"
+                :type   "bash_cat"
+                :inputs {:FILE {:shadow {:type   "bash_string"
+                                         :fields {:TEXT "/home/alice/notes.txt"}}}}}
+               {:kind   "block"
+                :type   "bash_head"
+                :inputs {:N    {:shadow {:type "bash_number" :fields {:NUM 2}}}
+                         :FILE {:shadow {:type   "bash_string"
+                                         :fields {:TEXT "/home/alice/notes.txt"}}}}}
+               {:kind   "block"
+                :type   "bash_grep"
+                :inputs {:PATTERN {:shadow {:type "bash_string" :fields {:TEXT "milk"}}}
+                         :FILE    {:shadow {:type   "bash_string"
+                                            :fields {:TEXT "/home/alice/notes.txt"}}}}}
+               {:kind "block" :type "bash_run"}
                {:kind "block" :type "bash_if"}
                {:kind "block" :type "bash_compare"}
                {:kind "block" :type "bash_number"}

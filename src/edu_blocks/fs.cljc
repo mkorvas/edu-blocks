@@ -21,6 +21,40 @@
                             (nested->node child-name child))))}
     {:type :file :name name :content (first v)}))
 
+(defn resolve-path
+  "Returns the node at path in the tree, or nil. Tolerates a leading
+   slash and the root directory's name as the first path segment."
+  [tree path]
+  (let [segs (remove str/blank? (str/split path #"/"))
+        segs (if (= (first segs) (:name tree)) (rest segs) segs)]
+    (reduce (fn [node seg]
+              (some #(when (= seg (:name %)) %) (:children node)))
+            tree
+            segs)))
+
+(defn- lines->text [lines]
+  (if (seq lines)
+    (str (str/join "\n" lines) "\n")
+    ""))
+
+(defn head-text
+  "The first n lines of text, as text."
+  [n text]
+  (if (= text "")
+    ""
+    (lines->text (take n (str/split-lines text)))))
+
+(defn grep-text
+  "The lines of text matching the regex pattern, as text."
+  [pattern text]
+  (lines->text (filter #(re-find (re-pattern pattern) %)
+                       (str/split-lines text))))
+
+(defn seq-text
+  "What seq(1) prints for the inclusive range from..to."
+  [from to]
+  (lines->text (range from (inc to))))
+
 (defn paths->tree
   "Builds a file-tree node from entries {:path relative-path-string
    :content text-or-nil}, the paths as given by the File API's

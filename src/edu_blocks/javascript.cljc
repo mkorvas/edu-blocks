@@ -41,16 +41,31 @@
 (defmethod emit "bash_word_list" [{:keys [args]}]
   (str "[" (str/join ", " (map emit (:ARGS args))) "]"))
 
+;; Commands translate to sandbox-provided helper functions returning
+;; their stdout as text, like the Bash commands they mirror.
+
 (defmethod emit "bash_subst" [{:keys [args]}]
+  ;; Unquoted $(...) in Bash splits the output into words.
   (if (some? (:CMD args))
-    (emit (:CMD args))
+    (str (emit (:CMD args)) ".split(/\\s+/).filter(Boolean)")
     "[]"))
 
 (defmethod emit "bash_seq" [{:keys [args]}]
-  ;; Bounds may be variables, so the length is computed at runtime.
-  (let [from (str "Number(" (emit (:FROM args)) ")")
-        to   (str "Number(" (emit (:TO args)) ")")]
-    (str "Array.from({length: " to " - " from " + 1}, (_, k) => k + " from ")")))
+  (str "seq(Number(" (emit (:FROM args)) "), Number(" (emit (:TO args)) "))"))
+
+(defmethod emit "bash_cat" [{:keys [args]}]
+  (str "cat(" (emit (:FILE args)) ")"))
+
+(defmethod emit "bash_head" [{:keys [args]}]
+  (str "head(Number(" (emit (:N args)) "), " (emit (:FILE args)) ")"))
+
+(defmethod emit "bash_grep" [{:keys [args]}]
+  (str "grep(" (emit (:PATTERN args)) ", " (emit (:FILE args)) ")"))
+
+(defmethod emit "bash_run" [{:keys [args]}]
+  (if (some? (:CMD args))
+    (str "process.stdout.write(" (emit (:CMD args)) ");")
+    ""))
 
 (defmethod emit "bash_if" [{:keys [args]}]
   (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")

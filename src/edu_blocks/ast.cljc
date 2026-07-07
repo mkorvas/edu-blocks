@@ -14,6 +14,10 @@
    "bash_assign"    {:fields [:VAR] :inputs [:VALUE]}
    "bash_subst"     {:inputs [:CMD]}
    "bash_seq"       {:inputs [:FROM :TO]}
+   "bash_cat"       {:inputs [:FILE]}
+   "bash_head"      {:inputs [:N :FILE]}
+   "bash_grep"      {:inputs [:PATTERN :FILE]}
+   "bash_run"       {:inputs [:CMD]}
    "bash_if"          {:inputs [:COND] :stmts [:THEN]}
    "bash_compare"     {:fields [:OP] :inputs [:A :B]}
    "bash_number"      {:fields [:NUM]}

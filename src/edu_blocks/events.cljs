@@ -39,23 +39,44 @@
  (fn [db [_ paths]]
    (assoc db :fs-tree (fs/paths->tree paths))))
 
+(defn- file-text
+  "The content of the file at path in the tree; throws a bash-styled
+   error when it cannot be read."
+  [tree cmd path]
+  (let [node (fs/resolve-path tree path)]
+    (cond
+      (nil? node)
+      (throw (js/Error. (str cmd ": " path ": No such file or directory")))
+      (= :dir (:type node))
+      (throw (js/Error. (str cmd ": " path ": Is a directory")))
+      (nil? (:content node))
+      (throw (js/Error. (str cmd ": " path ": cannot read a binary file")))
+      :else (:content node))))
+
 (defn eval-js
   "Evaluates JS code with console.log and process.stdout.write redirected
-   into a buffer; returns the captured output."
-  [code]
+   into a buffer, and with command helpers (cat, head, grep, seq) backed
+   by the virtual file tree; returns the captured output."
+  [code fs-tree]
   (let [buf     (atom "")
         console #js {:log (fn [x] (swap! buf str x "\n"))}
-        process #js {:stdout #js {:write (fn [x] (swap! buf str x))}}]
+        process #js {:stdout #js {:write (fn [x] (swap! buf str x))}}
+        cat     (fn [path] (file-text fs-tree "cat" path))
+        head    (fn [n path] (fs/head-text n (file-text fs-tree "head" path)))
+        grep    (fn [pattern path]
+                  (fs/grep-text pattern (file-text fs-tree "grep" path)))
+        seq*    (fn [from to] (fs/seq-text from to))]
     (try
-      ((js/Function. "console" "process" code) console process)
+      ((js/Function. "console" "process" "cat" "head" "grep" "seq" code)
+       console process cat head grep seq*)
       (catch :default e
         (swap! buf str "Error: " (ex-message e))))
     @buf))
 
 (rf/reg-fx
  ::eval-js
- (fn [code]
-   (rf/dispatch [::script-ran (eval-js code)])))
+ (fn [{:keys [code fs-tree]}]
+   (rf/dispatch [::script-ran (eval-js code fs-tree)])))
 
 (rf/reg-event-fx
  ::run-script
@@ -63,7 +84,7 @@
    (when-let [code (some-> (get-in db [:bky :json])
                            ast/bky-ws->ast
                            javascript/emit)]
-     {:fx [[::eval-js code]]})))
+     {:fx [[::eval-js {:code code :fs-tree (:fs-tree db)}]]})))
 
 (rf/reg-event-db
  ::script-ran

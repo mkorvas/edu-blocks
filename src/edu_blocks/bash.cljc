@@ -50,6 +50,18 @@
       (str "seq " (emit TO))
       (str "seq " (emit FROM) " " (emit TO)))))
 
+(defmethod emit "bash_cat" [{:keys [args]}]
+  (str "cat " (emit (:FILE args))))
+
+(defmethod emit "bash_head" [{:keys [args]}]
+  (str "head -n " (emit (:N args)) " " (emit (:FILE args))))
+
+(defmethod emit "bash_grep" [{:keys [args]}]
+  (str "grep " (emit (:PATTERN args)) " " (emit (:FILE args))))
+
+(defmethod emit "bash_run" [{:keys [args]}]
+  (emit (:CMD args)))
+
 (defmethod emit "bash_if" [{:keys [args]}]
   (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")
         then (if (seq (:THEN args))

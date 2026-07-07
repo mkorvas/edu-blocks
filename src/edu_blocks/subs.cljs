@@ -20,6 +20,11 @@
    (:exec-output db)))
 
 (rf/reg-sub
+ ::fs-tree
+ (fn [db _]
+   (:fs-tree db)))
+
+(rf/reg-sub
  ::code-output
  (fn [db _]
    (let [emit (emitters (:lang db) bash/emit)]

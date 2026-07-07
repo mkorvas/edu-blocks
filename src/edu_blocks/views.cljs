@@ -4,6 +4,7 @@
    ["@blockly/block-dynamic-connection" :as b-dyna]
    [re-com.core :refer [button h-box horizontal-bar-tabs]]
    [re-frame.core :as rf]
+   [reagent.core :as r]
 
    [edu-blocks.blocks :as blocks]
    [edu-blocks.events :as ev]
@@ -108,9 +109,41 @@
                     :white-space "pre-wrap"}}
       (or output "")]]))
 
+(defn- tree-node [node]
+  (if (= :dir (:type node))
+    (r/with-let [open? (r/atom true)]
+      [:div
+       [:div {:style    {:cursor "pointer" :white-space "nowrap"}
+              :on-click #(swap! open? not)}
+        [:i {:class (str "zmdi " (if @open? "zmdi-chevron-down" "zmdi-chevron-right"))
+             :style {:display "inline-block" :width "14px"}}]
+        [:i {:class "zmdi zmdi-folder" :style {:color "#e8b339"}}]
+        " " (:name node)]
+       (when @open?
+         [:div {:style {:margin-left "18px"}}
+          (for [child (:children node)]
+            ^{:key (:name child)} [tree-node child])])])
+    [:div {:style {:white-space "nowrap" :margin-left "14px"}}
+     [:i {:class "zmdi zmdi-file" :style {:color "#999"}}]
+     " " (:name node)]))
+
+(defn files-panel []
+  (let [tree @(rf/subscribe [::subs/fs-tree])]
+    [:div {:style {:flex        "0 0 250px"
+                   :height      "100%"
+                   :overflow    "auto"
+                   :padding     "12px"
+                   :background  "#f7f7f7"
+                   :border-left "1px solid #ddd"
+                   :font-family "monospace"
+                   :font-size   "14px"
+                   :line-height "1.6"}}
+     [tree-node tree]]))
+
 (defn main-panel []
   [h-box
    :style {:height "100vh" :width "100%"}
    :children [[blockly-pane]
               [output-panel]
-              [exec-panel]]])
+              [exec-panel]
+              [files-panel]]])

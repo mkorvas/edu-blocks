@@ -155,8 +155,6 @@
                    :background     "#f7f7f7"
                    :border-left    "1px solid #ddd"}}
      [:div {:style {:padding "8px" :border-bottom "1px solid #ddd"}}
-      ;; Only file names/paths are read from the picked directory,
-      ;; never file contents.
       [:input {:type            "file"
                :webkitdirectory ""
                :title           "Load a folder as the file tree"

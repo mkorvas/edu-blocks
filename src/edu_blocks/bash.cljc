@@ -36,5 +36,14 @@
 (defmethod emit "bash_word_list" [{:keys [args]}]
   (str/join " " (map emit (:ARGS args))))
 
+(defmethod emit "bash_subst" [{:keys [args]}]
+  (str "$(" (emit (:CMD args)) ")"))
+
+(defmethod emit "bash_seq" [{:keys [args]}]
+  (let [{:keys [FROM TO]} args]
+    (if (= 1 FROM)
+      (str "seq " TO)
+      (str "seq " FROM " " TO))))
+
 (defmethod emit :default [{:keys [type]}]
   (str "# unknown block: " type))

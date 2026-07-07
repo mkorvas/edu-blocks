@@ -35,7 +35,19 @@
      :message0 "$%1"
      :args0   [{:type "field_input" :name "VAR" :text "i"}]
      :output  "String"
-     :colour  330}]))
+     :colour  330}
+    {:type         "bash_subst"
+     :message0     "$( %1 )"
+     :args0        [{:type "input_value" :name "CMD" :check "Command"}]
+     :inputsInline true
+     :output       "WordList"
+     :colour       40}
+    {:type    "bash_seq"
+     :message0 "seq %1 .. %2"
+     :args0   [{:type "field_number" :name "FROM" :value 1 :precision 1}
+               {:type "field_number" :name "TO" :value 10 :precision 1}]
+     :output  "Command"
+     :colour  210}]))
 
 (def toolbox
   (clj->js
@@ -45,7 +57,9 @@
                {:kind "block" :type "bash_for"}
                {:kind "block" :type "bash_string"}
                {:kind "block" :type "bash_var"}
-               {:kind "block" :type "bash_word_list"}]}))
+               {:kind "block" :type "bash_word_list"}
+               {:kind "block" :type "bash_subst"}
+               {:kind "block" :type "bash_seq"}]}))
 
 (defn define-blocks! []
   (let [defs (b/common.createBlockDefinitionsFromJsonArray configs)]

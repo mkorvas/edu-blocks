@@ -34,5 +34,14 @@
 (defmethod emit "bash_word_list" [{:keys [args]}]
   (str "[" (str/join ", " (map emit (:ARGS args))) "]"))
 
+(defmethod emit "bash_subst" [{:keys [args]}]
+  (if (some? (:CMD args))
+    (emit (:CMD args))
+    "[]"))
+
+(defmethod emit "bash_seq" [{:keys [args]}]
+  (let [{:keys [FROM TO]} args]
+    (str "Array.from({length: " (inc (- TO FROM)) "}, (_, k) => k + " FROM ")")))
+
 (defmethod emit :default [{:keys [type]}]
   (str "// unknown block: " type))

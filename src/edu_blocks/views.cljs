@@ -2,6 +2,7 @@
   (:require
    ["blockly" :as b]
    ["@blockly/block-dynamic-connection" :as b-dyna]
+   [clojure.string :as str]
    [re-com.core :refer [button h-box horizontal-bar-tabs]]
    [re-frame.core :as rf]
    [reagent.core :as r]
@@ -127,11 +128,23 @@
      [:i {:class "zmdi zmdi-file" :style {:color "#999"}}]
      " " (:name node)]))
 
+(def ^:private max-content-bytes (* 100 1024))
+
+(defn- read-file-entry
+  "Returns a Promise of {:path ... :content ...} for a File object.
+   Content is capped at max-content-bytes; a file whose text does not
+   decode cleanly (binary) gets a nil content."
+  [^js file]
+  (-> (.text (.slice file 0 max-content-bytes))
+      (.then (fn [text]
+               {:path    (.-webkitRelativePath file)
+                :content (when-not (str/includes? text "�") text)}))))
+
 (defn- on-dir-upload [^js e]
-  (let [paths (mapv #(.-webkitRelativePath ^js %)
-                    (array-seq (.. e -target -files)))]
-    (when (seq paths)
-      (rf/dispatch [::ev/fs-uploaded paths]))))
+  (let [files (array-seq (.. e -target -files))]
+    (when (seq files)
+      (-> (js/Promise.all (into-array (map read-file-entry files)))
+          (.then #(rf/dispatch [::ev/fs-uploaded (vec (array-seq %))]))))))
 
 (defn files-panel []
   (let [tree @(rf/subscribe [::subs/fs-tree])]

@@ -1,8 +1,9 @@
 (ns edu-blocks.db)
 
 ; A node of the virtual file tree is either
-;   {:type :file :name "..."} or
+;   {:type :file :name "..." :content text-or-nil} or
 ;   {:type :dir  :name "..." :children [node ...]}.
+; A nil :content means the content is not available (binary file).
 (def sample-fs-tree
   {:type :dir :name "/"
    :children
@@ -11,14 +12,18 @@
      [{:type :dir :name "alice"
        :children
        [{:type :dir :name "photos"
-         :children [{:type :file :name "cat.jpg"}
-                    {:type :file :name "dog.jpg"}]}
-        {:type :file :name "notes.txt"}
-        {:type :file :name "todo.md"}]}
+         :children [{:type :file :name "cat.jpg" :content nil}
+                    {:type :file :name "dog.jpg" :content nil}]}
+        {:type :file :name "notes.txt"
+         :content "Remember to water the plants.\nBuy milk.\nCall grandma.\n"}
+        {:type :file :name "todo.md"
+         :content "# TODO\n- learn bash\n- sort the photos\n"}]}
       {:type :dir :name "bob"
-       :children [{:type :file :name "script.sh"}]}]}
+       :children [{:type :file :name "script.sh"
+                   :content "#!/bin/bash\necho \"Hello from Bob\"\n"}]}]}
     {:type :dir :name "tmp"
-     :children [{:type :file :name "scratch.txt"}]}]})
+     :children [{:type :file :name "scratch.txt"
+                 :content "just scribbles\n"}]}]})
 
 (def default-db
 

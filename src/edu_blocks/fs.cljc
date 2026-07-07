@@ -1,10 +1,14 @@
 (ns edu-blocks.fs
   (:require [clojure.string :as str]))
 
-(defn- paths->nested [paths]
-  (reduce (fn [m segs] (assoc-in m segs ::file))
+;; In the intermediate nested representation a directory is a map of
+;; name -> child and a file is its content wrapped in a vector (so
+;; that a nil content still looks different from a directory).
+(defn- entries->nested [entries]
+  (reduce (fn [m {:keys [path content]}]
+            (assoc-in m (str/split path #"/") [content]))
           {}
-          (map #(str/split % #"/") paths)))
+          entries))
 
 (defn- nested->node [name v]
   (if (map? v)
@@ -15,13 +19,14 @@
                              v)
                     (mapv (fn [[child-name child]]
                             (nested->node child-name child))))}
-    {:type :file :name name}))
+    {:type :file :name name :content (first v)}))
 
 (defn paths->tree
-  "Builds a file-tree node from relative path strings, as given by
-   the File API's webkitRelativePath. Directories sort before files."
-  [paths]
-  (let [nested (paths->nested paths)]
+  "Builds a file-tree node from entries {:path relative-path-string
+   :content text-or-nil}, the paths as given by the File API's
+   webkitRelativePath. Directories sort before files."
+  [entries]
+  (let [nested (entries->nested entries)]
     ;; webkitRelativePath prefixes every path with the picked directory,
     ;; which thus becomes the root node.
     (if (= 1 (count nested))

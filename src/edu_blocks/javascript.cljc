@@ -47,8 +47,10 @@
     "[]"))
 
 (defmethod emit "bash_seq" [{:keys [args]}]
-  (let [{:keys [FROM TO]} args]
-    (str "Array.from({length: " (inc (- TO FROM)) "}, (_, k) => k + " FROM ")")))
+  ;; Bounds may be variables, so the length is computed at runtime.
+  (let [from (str "Number(" (emit (:FROM args)) ")")
+        to   (str "Number(" (emit (:TO args)) ")")]
+    (str "Array.from({length: " to " - " from " + 1}, (_, k) => k + " from ")")))
 
 (defmethod emit "bash_if" [{:keys [args]}]
   (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")

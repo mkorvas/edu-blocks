@@ -13,7 +13,7 @@
    "bash_var"       {:fields [:VAR]}
    "bash_assign"    {:fields [:VAR] :inputs [:VALUE]}
    "bash_subst"     {:inputs [:CMD]}
-   "bash_seq"       {:fields [:FROM :TO]}
+   "bash_seq"       {:inputs [:FROM :TO]}
    "bash_if"          {:inputs [:COND] :stmts [:THEN]}
    "bash_compare"     {:fields [:OP] :inputs [:A :B]}
    "bash_number"      {:fields [:NUM]}
@@ -24,14 +24,18 @@
 (defn- bky-field [block k]
   (get-in block [:fields k]))
 
+;; A real block connected over a shadow takes precedence over it.
+(defn- input-block [input]
+  (or (:block input) (:shadow input)))
+
 (defn- bky-input [block k]
-  (bky-block->ast (get-in block [:inputs k :block])))
+  (bky-block->ast (input-block (get-in block [:inputs k]))))
 
 (defn- bky-varargs [block]
   (->> (:inputs block)
        (keep (fn [[k v]]
                (when-let [[_ n] (re-matches #"ADD(\d+)" (name k))]
-                 [(parse-long n) (bky-block->ast (:block v))])))
+                 [(parse-long n) (bky-block->ast (input-block v))])))
        (sort-by first)
        (mapv second)))
 

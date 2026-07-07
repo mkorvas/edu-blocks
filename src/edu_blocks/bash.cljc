@@ -43,10 +43,12 @@
   (str "$(" (emit (:CMD args)) ")"))
 
 (defmethod emit "bash_seq" [{:keys [args]}]
-  (let [{:keys [FROM TO]} args]
-    (if (= 1 FROM)
-      (str "seq " TO)
-      (str "seq " FROM " " TO))))
+  (let [{:keys [FROM TO]} args
+        from-one? (and (= "bash_number" (:type FROM))
+                       (= 1 (get-in FROM [:args :NUM])))]
+    (if from-one?
+      (str "seq " (emit TO))
+      (str "seq " (emit FROM) " " (emit TO)))))
 
 (defmethod emit "bash_if" [{:keys [args]}]
   (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")

@@ -50,12 +50,13 @@
      :inputsInline true
      :output       "WordList"
      :colour       40}
-    {:type    "bash_seq"
-     :message0 "seq %1 .. %2"
-     :args0   [{:type "field_number" :name "FROM" :value 1 :precision 1}
-               {:type "field_number" :name "TO" :value 10 :precision 1}]
-     :output  "Command"
-     :colour  210}
+    {:type         "bash_seq"
+     :message0     "seq %1 .. %2"
+     :args0        [{:type "input_value" :name "FROM" :check ["Number" "String"]}
+                    {:type "input_value" :name "TO" :check ["Number" "String"]}]
+     :inputsInline true
+     :output       "Command"
+     :colour       210}
     {:type              "bash_if"
      :message0          "if %1"
      :args0             [{:type "input_value" :name "COND" :check "Condition"}]
@@ -107,7 +108,10 @@
                {:kind "block" :type "bash_assign"}
                {:kind "block" :type "bash_word_list"}
                {:kind "block" :type "bash_subst"}
-               {:kind "block" :type "bash_seq"}
+               {:kind   "block"
+                :type   "bash_seq"
+                :inputs {:FROM {:shadow {:type "bash_number" :fields {:NUM 1}}}
+                         :TO   {:shadow {:type "bash_number" :fields {:NUM 10}}}}}
                {:kind "block" :type "bash_if"}
                {:kind "block" :type "bash_compare"}
                {:kind "block" :type "bash_number"}

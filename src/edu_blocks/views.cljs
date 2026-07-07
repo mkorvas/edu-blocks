@@ -1,7 +1,7 @@
 (ns edu-blocks.views
   (:require
    ["blockly" :as b]
-   [re-com.core :refer [h-box horizontal-bar-tabs]]
+   [re-com.core :refer [button h-box horizontal-bar-tabs]]
    [re-frame.core :as rf]
 
    [edu-blocks.blocks :as blocks]
@@ -83,8 +83,30 @@
                  :js "// Drop a script block\n// to get started"
                  "# Drop a script block\n# to get started"))]]))
 
+(defn exec-panel []
+  (let [output @(rf/subscribe [::subs/exec-output])]
+    [:div {:style {:flex           "0 0 300px"
+                   :height         "100%"
+                   :display        "flex"
+                   :flex-direction "column"
+                   :background     "#000"}}
+     [:div {:style {:padding "8px"}}
+      [button
+       :label    "Run JS"
+       :class    "btn-primary"
+       :on-click #(rf/dispatch [::ev/run-script])]]
+     [:pre {:style {:margin      0
+                    :padding     "12px"
+                    :flex        "1 1 auto"
+                    :overflow-y  "auto"
+                    :color       "#9f9"
+                    :font-family "monospace"
+                    :white-space "pre-wrap"}}
+      (or output "")]]))
+
 (defn main-panel []
   [h-box
    :style {:height "100vh" :width "100%"}
    :children [[blockly-pane]
-              [output-panel]]])
+              [output-panel]
+              [exec-panel]]])

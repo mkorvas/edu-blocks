@@ -58,5 +58,14 @@
   (let [op (case (:OP args) "NEQ" "!=" "=")]
     (str "[ " (emit (:A args)) " " op " " (emit (:B args)) " ]")))
 
+(defmethod emit "bash_number" [{:keys [args]}]
+  (str (:NUM args)))
+
+(defmethod emit "bash_compare_num" [{:keys [args]}]
+  (let [op ({"EQ" "-eq" "NEQ" "-ne"
+             "LT" "-lt" "LE" "-le"
+             "GT" "-gt" "GE" "-ge"} (:OP args))]
+    (str "[ " (emit (:A args)) " " op " " (emit (:B args)) " ]")))
+
 (defmethod emit :default [{:keys [type]}]
   (str "# unknown block: " type))

@@ -13,8 +13,10 @@
    "bash_var"       {:fields [:VAR]}
    "bash_subst"     {:inputs [:CMD]}
    "bash_seq"       {:fields [:FROM :TO]}
-   "bash_if"        {:inputs [:COND] :stmts [:THEN]}
-   "bash_compare"   {:fields [:OP] :inputs [:A :B]}})
+   "bash_if"          {:inputs [:COND] :stmts [:THEN]}
+   "bash_compare"     {:fields [:OP] :inputs [:A :B]}
+   "bash_number"      {:fields [:NUM]}
+   "bash_compare_num" {:fields [:OP] :inputs [:A :B]}})
 
 (declare bky-block->ast)
 

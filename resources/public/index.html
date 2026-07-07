@@ -11,6 +11,15 @@
      <link rel="stylesheet" href="/assets/css/re-com.css" />
      <link rel="stylesheet" href="/assets/css/roboto-fonts.css" />
      <link rel="stylesheet" href="/assets/css/roboto-condensed-fonts.css" />
+     <style>
+       /* !important: Blockly injects its font rules with theme-specific,
+          higher-specificity selectors. translateY instead of
+          baseline-shift, which Firefox/Waterfox lacks for SVG text. */
+       .blocklyText.eduSuperLabel {
+         font-size: 0.8em !important;
+         transform: translateY(-0.65em);
+       }
+     </style>
    </head>
    <body>
     <div id="edu-blocks">

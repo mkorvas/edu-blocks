@@ -30,7 +30,7 @@
      :message0 "\"%1\""
      :args0   [{:type "field_input" :name "TEXT" :text "hello"}]
      :output  "String"
-     :colour  160}
+     :colour  0}
     {:type    "bash_var"
      :message0 "$%1"
      :args0   [{:type "field_input" :name "VAR" :text "i"}]
@@ -57,14 +57,35 @@
      :nextStatement     nil
      :colour            60}
     {:type         "bash_compare"
-     :message0     "%1 %2 %3"
+     :message0     "%1 %2 %3 %4"
      :args0        [{:type "input_value" :name "A" :check "String"}
                     {:type    "field_dropdown"
                      :name    "OP"
                      :options [["=" "EQ"] ["≠" "NEQ"]]}
+                    {:type "field_label" :text "abc" :class "eduSuperLabel"}
                     {:type "input_value" :name "B" :check "String"}]
      :inputsInline true
      :output       "Condition"
+     :tooltip      "Compares the two values as text."
+     :colour       30}
+    {:type    "bash_number"
+     :message0 "%1"
+     :args0   [{:type "field_number" :name "NUM" :value 0}]
+     :output  ["Number" "String"]
+     :colour  210}
+    {:type         "bash_compare_num"
+     :message0     "%1 %2 %3 %4"
+     :args0        [{:type "input_value" :name "A" :check ["Number" "String"]}
+                    {:type    "field_dropdown"
+                     :name    "OP"
+                     :options [["=" "EQ"] ["≠" "NEQ"]
+                               ["<" "LT"] ["≤" "LE"]
+                               [">" "GT"] ["≥" "GE"]]}
+                    {:type "field_label" :text "123" :class "eduSuperLabel"}
+                    {:type "input_value" :name "B" :check ["Number" "String"]}]
+     :inputsInline true
+     :output       "Condition"
+     :tooltip      "Compares the two values as numbers."
      :colour       230}]))
 
 (def toolbox
@@ -79,7 +100,9 @@
                {:kind "block" :type "bash_subst"}
                {:kind "block" :type "bash_seq"}
                {:kind "block" :type "bash_if"}
-               {:kind "block" :type "bash_compare"}]}))
+               {:kind "block" :type "bash_compare"}
+               {:kind "block" :type "bash_number"}
+               {:kind "block" :type "bash_compare_num"}]}))
 
 (defn define-blocks! []
   (let [defs (b/common.createBlockDefinitionsFromJsonArray configs)]

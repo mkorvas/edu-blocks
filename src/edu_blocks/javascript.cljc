@@ -56,5 +56,16 @@
   (let [op (case (:OP args) "NEQ" "!==" "===")]
     (str "String(" (emit (:A args)) ") " op " String(" (emit (:B args)) ")")))
 
+(defmethod emit "bash_number" [{:keys [args]}]
+  (str (:NUM args)))
+
+(defmethod emit "bash_compare_num" [{:keys [args]}]
+  ;; Bash [ -eq ] etc. compare numerically, so coerce both sides
+  ;; (operands may be string-typed, e.g. a $var).
+  (let [op ({"EQ" "===" "NEQ" "!=="
+             "LT" "<" "LE" "<="
+             "GT" ">" "GE" ">="} (:OP args))]
+    (str "Number(" (emit (:A args)) ") " op " Number(" (emit (:B args)) ")")))
+
 (defmethod emit :default [{:keys [type]}]
   (str "// unknown block: " type))

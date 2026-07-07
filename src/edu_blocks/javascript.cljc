@@ -28,9 +28,8 @@
 (defmethod emit "bash_string" [{:keys [args]}]
   (pr-str (:TEXT args)))
 
-(defmethod emit "bash_words" [{:keys [args]}]
-  (let [words (remove str/blank? (str/split (str (:WORDS args)) #"\s+"))]
-    (str "[" (str/join ", " (map pr-str words)) "]")))
+(defmethod emit "bash_word_list" [{:keys [args]}]
+  (str "[" (str/join ", " (map emit (:ARGS args))) "]"))
 
 (defmethod emit :default [{:keys [type]}]
   (str "// unknown block: " type))

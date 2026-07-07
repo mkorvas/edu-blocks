@@ -30,8 +30,8 @@
 (defmethod emit "bash_string" [{:keys [args]}]
   (str "\"" (:TEXT args) "\""))
 
-(defmethod emit "bash_words" [{:keys [args]}]
-  (:WORDS args))
+(defmethod emit "bash_word_list" [{:keys [args]}]
+  (str/join " " (map emit (:ARGS args))))
 
 (defmethod emit :default [{:keys [type]}]
   (str "# unknown block: " type))

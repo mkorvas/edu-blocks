@@ -1,6 +1,7 @@
 (ns edu-blocks.views
   (:require
    ["blockly" :as b]
+   ["@blockly/block-dynamic-connection" :as b-dyna]
    [re-com.core :refer [button h-box horizontal-bar-tabs]]
    [re-frame.core :as rf]
 
@@ -14,7 +15,9 @@
    {:toolbox  blocks/toolbox
     :grid     {:spacing 20 :length 3 :colour "#ccc" :snap true}
     :zoom     {:controls true}
-    :trashcan true}))
+    :trashcan true
+    :plugins  {:connectionPreviewer
+               (b-dyna/decoratePreviewer b/InsertionMarkerPreviewer)}}))
 
 (defn bky-js->clj [bky]
   (cond
@@ -44,6 +47,7 @@
     (let [ws (b/inject el ws-config)
           observer (js/ResizeObserver. (fn [_] (b/svgResize ws)))]
       (.observe observer el)
+      (.addChangeListener ws b-dyna/finalizeConnections)
       (.addChangeListener ws (on-ws-change ws))
       (rf/dispatch [::ev/ws-created ws observer])
       (fn []

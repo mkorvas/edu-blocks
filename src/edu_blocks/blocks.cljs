@@ -1,5 +1,6 @@
 (ns edu-blocks.blocks
-  (:require ["blockly" :as b]))
+  (:require ["blockly" :as b]
+            ["/blocks/word_list" :refer (wordListBlock)]))
 
 (def ^:private configs
   (clj->js
@@ -29,12 +30,7 @@
      :message0 "\"%1\""
      :args0   [{:type "field_input" :name "TEXT" :text "hello"}]
      :output  "String"
-     :colour  160}
-    {:type    "bash_words"
-     :message0 "words %1"
-     :args0   [{:type "field_input" :name "WORDS" :text "a b c"}]
-     :output  "WordList"
-     :colour  20}]))
+     :colour  160}]))
 
 (def toolbox
   (clj->js
@@ -43,9 +39,9 @@
                {:kind "block" :type "bash_echo"}
                {:kind "block" :type "bash_for"}
                {:kind "block" :type "bash_string"}
-               {:kind "block" :type "bash_words"}]}))
+               {:kind "block" :type "bash_word_list"}]}))
 
 (defn define-blocks! []
-  (-> configs
-      b/common.createBlockDefinitionsFromJsonArray
-      b/common.defineBlocks))
+  (let [defs (b/common.createBlockDefinitionsFromJsonArray configs)]
+    (set! (.-bash_word_list defs) wordListBlock)
+    (b/common.defineBlocks defs)))

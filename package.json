@@ -2,6 +2,7 @@
   "name": "edu-blocks",
   "packageManager": "yarn@4.15.0",
   "dependencies": {
+    "@blockly/block-dynamic-connection": "^0.8.9",
     "blockly": "^12.5.1",
     "bootstrap": "5.3.8",
     "react": "^19.2.6",

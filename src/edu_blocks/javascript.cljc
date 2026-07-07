@@ -43,5 +43,18 @@
   (let [{:keys [FROM TO]} args]
     (str "Array.from({length: " (inc (- TO FROM)) "}, (_, k) => k + " FROM ")")))
 
+(defmethod emit "bash_if" [{:keys [args]}]
+  (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")
+        then (str/join "\n" (map emit (:THEN args)))]
+    (str "if (" cond ") {\n"
+         (indent then)
+         "\n}")))
+
+(defmethod emit "bash_compare" [{:keys [args]}]
+  ;; Bash [ = ] compares strings, so coerce both sides to keep the
+  ;; two languages in agreement (e.g. a numeric loop var vs "3").
+  (let [op (case (:OP args) "NEQ" "!==" "===")]
+    (str "String(" (emit (:A args)) ") " op " String(" (emit (:B args)) ")")))
+
 (defmethod emit :default [{:keys [type]}]
   (str "// unknown block: " type))

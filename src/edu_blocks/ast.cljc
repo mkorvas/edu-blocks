@@ -12,7 +12,9 @@
    "bash_string"    {:fields [:TEXT]}
    "bash_var"       {:fields [:VAR]}
    "bash_subst"     {:inputs [:CMD]}
-   "bash_seq"       {:fields [:FROM :TO]}})
+   "bash_seq"       {:fields [:FROM :TO]}
+   "bash_if"        {:inputs [:COND] :stmts [:THEN]}
+   "bash_compare"   {:fields [:OP] :inputs [:A :B]}})
 
 (declare bky-block->ast)
 

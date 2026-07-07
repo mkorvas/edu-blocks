@@ -47,7 +47,25 @@
      :args0   [{:type "field_number" :name "FROM" :value 1 :precision 1}
                {:type "field_number" :name "TO" :value 10 :precision 1}]
      :output  "Command"
-     :colour  210}]))
+     :colour  210}
+    {:type              "bash_if"
+     :message0          "if %1"
+     :args0             [{:type "input_value" :name "COND" :check "Condition"}]
+     :message1          "then %1"
+     :args1             [{:type "input_statement" :name "THEN"}]
+     :previousStatement nil
+     :nextStatement     nil
+     :colour            60}
+    {:type         "bash_compare"
+     :message0     "%1 %2 %3"
+     :args0        [{:type "input_value" :name "A" :check "String"}
+                    {:type    "field_dropdown"
+                     :name    "OP"
+                     :options [["=" "EQ"] ["≠" "NEQ"]]}
+                    {:type "input_value" :name "B" :check "String"}]
+     :inputsInline true
+     :output       "Condition"
+     :colour       230}]))
 
 (def toolbox
   (clj->js
@@ -59,7 +77,9 @@
                {:kind "block" :type "bash_var"}
                {:kind "block" :type "bash_word_list"}
                {:kind "block" :type "bash_subst"}
-               {:kind "block" :type "bash_seq"}]}))
+               {:kind "block" :type "bash_seq"}
+               {:kind "block" :type "bash_if"}
+               {:kind "block" :type "bash_compare"}]}))
 
 (defn define-blocks! []
   (let [defs (b/common.createBlockDefinitionsFromJsonArray configs)]

@@ -11,6 +11,7 @@
    "bash_word_list" {:varargs [:ARGS]}
    "bash_string"    {:fields [:TEXT]}
    "bash_var"       {:fields [:VAR]}
+   "bash_assign"    {:fields [:VAR] :inputs [:VALUE]}
    "bash_subst"     {:inputs [:CMD]}
    "bash_seq"       {:fields [:FROM :TO]}
    "bash_if"          {:inputs [:COND] :stmts [:THEN]}

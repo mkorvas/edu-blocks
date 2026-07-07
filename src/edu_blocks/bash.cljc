@@ -33,6 +33,9 @@
 (defmethod emit "bash_var" [{:keys [args]}]
   (str "\"$" (:VAR args) "\""))
 
+(defmethod emit "bash_assign" [{:keys [args]}]
+  (str (:VAR args) "=" (emit (:VALUE args))))
+
 (defmethod emit "bash_word_list" [{:keys [args]}]
   (str/join " " (map emit (:ARGS args))))
 

@@ -31,6 +31,13 @@
 (defmethod emit "bash_var" [{:keys [args]}]
   (:VAR args))
 
+(defmethod emit "bash_assign" [{:keys [args]}]
+  ;; var, not let: repeated set-blocks for the same name would make
+  ;; let throw, and var's function scoping matches Bash variables.
+  ;; An empty socket means the empty string, as in Bash.
+  (let [value (if (some? (:VALUE args)) (emit (:VALUE args)) "\"\"")]
+    (str "var " (:VAR args) " = " value ";")))
+
 (defmethod emit "bash_word_list" [{:keys [args]}]
   (str "[" (str/join ", " (map emit (:ARGS args))) "]"))
 

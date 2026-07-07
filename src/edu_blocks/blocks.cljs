@@ -36,6 +36,14 @@
      :args0   [{:type "field_input" :name "VAR" :text "i"}]
      :output  "String"
      :colour  330}
+    {:type              "bash_assign"
+     :message0          "set %1 to %2"
+     :args0             [{:type "field_input" :name "VAR" :text "x"}
+                         {:type "input_value" :name "VALUE" :check ["String" "Number"]}]
+     :inputsInline      true
+     :previousStatement nil
+     :nextStatement     nil
+     :colour            330}
     {:type         "bash_subst"
      :message0     "$( %1 )"
      :args0        [{:type "input_value" :name "CMD" :check "Command"}]
@@ -96,6 +104,7 @@
                {:kind "block" :type "bash_for"}
                {:kind "block" :type "bash_string"}
                {:kind "block" :type "bash_var"}
+               {:kind "block" :type "bash_assign"}
                {:kind "block" :type "bash_word_list"}
                {:kind "block" :type "bash_subst"}
                {:kind "block" :type "bash_seq"}

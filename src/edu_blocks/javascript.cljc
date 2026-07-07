@@ -28,6 +28,9 @@
 (defmethod emit "bash_string" [{:keys [args]}]
   (pr-str (:TEXT args)))
 
+(defmethod emit "bash_var" [{:keys [args]}]
+  (:VAR args))
+
 (defmethod emit "bash_word_list" [{:keys [args]}]
   (str "[" (str/join ", " (map emit (:ARGS args))) "]"))
 

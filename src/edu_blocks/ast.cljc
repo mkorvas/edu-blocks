@@ -9,7 +9,8 @@
    "bash_echo"      {:fields [:NEWLINE] :inputs [:VALUE]}
    "bash_for"       {:fields [:VAR] :inputs [:LIST] :stmts [:BODY]}
    "bash_word_list" {:varargs [:ARGS]}
-   "bash_string"    {:fields [:TEXT]}})
+   "bash_string"    {:fields [:TEXT]}
+   "bash_var"       {:fields [:VAR]}})
 
 (declare bky-block->ast)
 

@@ -30,7 +30,12 @@
      :message0 "\"%1\""
      :args0   [{:type "field_input" :name "TEXT" :text "hello"}]
      :output  "String"
-     :colour  160}]))
+     :colour  160}
+    {:type    "bash_var"
+     :message0 "$%1"
+     :args0   [{:type "field_input" :name "VAR" :text "i"}]
+     :output  "String"
+     :colour  330}]))
 
 (def toolbox
   (clj->js
@@ -39,6 +44,7 @@
                {:kind "block" :type "bash_echo"}
                {:kind "block" :type "bash_for"}
                {:kind "block" :type "bash_string"}
+               {:kind "block" :type "bash_var"}
                {:kind "block" :type "bash_word_list"}]}))
 
 (defn define-blocks! []

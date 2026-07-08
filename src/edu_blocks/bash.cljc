@@ -42,6 +42,9 @@
 (defmethod emit "bash_subst" [{:keys [args]}]
   (str "$(" (emit (:CMD args)) ")"))
 
+(defmethod emit "bash_subst_str" [{:keys [args]}]
+  (str "\"$(" (emit (:CMD args)) ")\""))
+
 (defmethod emit "bash_seq" [{:keys [args]}]
   (let [{:keys [FROM TO]} args
         from-one? (and (= "bash_number" (:type FROM))

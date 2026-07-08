@@ -49,6 +49,14 @@
      :args0        [{:type "input_value" :name "CMD" :check "Command"}]
      :inputsInline true
      :output       "WordList"
+     :tooltip      "The output of a command, split into words."
+     :colour       40}
+    {:type         "bash_subst_str"
+     :message0     "\"$( %1 )\""
+     :args0        [{:type "input_value" :name "CMD" :check "Command"}]
+     :inputsInline true
+     :output       "String"
+     :tooltip      "The output of a command, as one text value."
      :colour       40}
     {:type         "bash_seq"
      :message0     "seq %1 .. %2"
@@ -139,6 +147,7 @@
                {:kind "block" :type "bash_assign"}
                {:kind "block" :type "bash_word_list"}
                {:kind "block" :type "bash_subst"}
+               {:kind "block" :type "bash_subst_str"}
                {:kind   "block"
                 :type   "bash_seq"
                 :inputs {:FROM {:shadow {:type "bash_number" :fields {:NUM 1}}}

@@ -13,6 +13,7 @@
    "bash_var"       {:fields [:VAR]}
    "bash_assign"    {:fields [:VAR] :inputs [:VALUE]}
    "bash_subst"     {:inputs [:CMD]}
+   "bash_subst_str" {:inputs [:CMD]}
    "bash_seq"       {:inputs [:FROM :TO]}
    "bash_cat"       {:inputs [:FILE]}
    "bash_head"      {:inputs [:N :FILE]}

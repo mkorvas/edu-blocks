@@ -50,6 +50,12 @@
     (str (emit (:CMD args)) ".split(/\\s+/).filter(Boolean)")
     "[]"))
 
+(defmethod emit "bash_subst_str" [{:keys [args]}]
+  ;; "$(...)" in Bash yields the output verbatim, minus trailing newlines.
+  (if (some? (:CMD args))
+    (str (emit (:CMD args)) ".replace(/\\n+$/, \"\")")
+    "\"\""))
+
 (defmethod emit "bash_seq" [{:keys [args]}]
   (str "seq(Number(" (emit (:FROM args)) "), Number(" (emit (:TO args)) "))"))
 

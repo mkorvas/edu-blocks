@@ -5,8 +5,44 @@
 
 (defmethod emit nil [_] "")
 
+(defn- group-pipes [stmts]
+  (reduce (fn [acc s]
+            (case (:type s)
+              "bash_run"  (conj acc [:pipe [s]])
+              "bash_pipe" (if (= :pipe (first (peek acc)))
+                            (update-in acc [(dec (count acc)) 1] conj s)
+                            (conj acc [:stmt s]))
+              (conj acc [:stmt s])))
+          []
+          stmts))
+
+(declare emit-stage)
+(declare indent)
+
+(defn- emit-pipeline [stages]
+  (if (= 1 (count stages))
+    (str "process.stdout.write(" (emit-stage (:CMD (:args (first stages))) nil) ");")
+    (str "process.stdout.write((function () {\n"
+         (indent
+          (str "var __stdin = \"\";\n"
+               (str/join
+                "\n"
+                (map (fn [stage]
+                       (str "__stdin = " (emit-stage (:CMD (:args stage)) "__stdin") ";"))
+                     stages))
+               "\nreturn __stdin;"))
+         "\n})());")))
+
+(defn- emit-group [[kind v]]
+  (case kind
+    :stmt (emit v)
+    :pipe (emit-pipeline v)))
+
+(defn- emit-stmts [stmts]
+  (str/join "\n" (map emit-group (group-pipes stmts))))
+
 (defmethod emit "bash_script" [{:keys [args]}]
-  (str/join "\n" (map emit (:STMTS args))))
+  (emit-stmts (:STMTS args)))
 
 (defmethod emit "bash_echo" [{:keys [args]}]
   (if (false? (:NEWLINE args))
@@ -20,7 +56,7 @@
 
 (defmethod emit "bash_for" [{:keys [args]}]
   (let [list (if (some? (:LIST args)) (emit (:LIST args)) "[]")
-        body (str/join "\n" (map emit (:BODY args)))]
+        body (emit-stmts (:BODY args))]
     (str "for (const " (:VAR args) " of " list ") {\n"
          (indent body)
          "\n}")))
@@ -59,23 +95,51 @@
 (defmethod emit "bash_seq" [{:keys [args]}]
   (str "seq(Number(" (emit (:FROM args)) "), Number(" (emit (:TO args)) "))"))
 
+;; head and grep take text (not a path); cat wraps a file path into
+;; text, and inside a pipe an empty FILE reads from the previous
+;; stage's stdout.
+(defn- file-source [file stdin]
+  (cond
+    (some? file) (str "cat(" (emit file) ")")
+    (some? stdin) stdin
+    :else "\"\""))
+
 (defmethod emit "bash_cat" [{:keys [args]}]
   (str "cat(" (emit (:FILE args)) ")"))
 
 (defmethod emit "bash_head" [{:keys [args]}]
-  (str "head(Number(" (emit (:N args)) "), " (emit (:FILE args)) ")"))
+  (emit-stage {:type "bash_head" :args args} nil))
 
 (defmethod emit "bash_grep" [{:keys [args]}]
-  (str "grep(" (emit (:PATTERN args)) ", " (emit (:FILE args)) ")"))
+  (emit-stage {:type "bash_grep" :args args} nil))
+
+(defn- emit-stage
+  "Emits a Command in a (possibly pipe-) context; when stdin is a JS
+   expression (variable name), head/grep read from it if FILE is empty."
+  [cmd stdin]
+  (case (:type cmd)
+    "bash_head"
+    (str "head(Number(" (emit (:N (:args cmd))) "), "
+         (file-source (:FILE (:args cmd)) stdin) ")")
+    "bash_grep"
+    (str "grep(" (emit (:PATTERN (:args cmd))) ", "
+         (file-source (:FILE (:args cmd)) stdin) ")")
+    (emit cmd)))
 
 (defmethod emit "bash_run" [{:keys [args]}]
   (if (some? (:CMD args))
     (str "process.stdout.write(" (emit (:CMD args)) ");")
     ""))
 
+;; A stray bash_pipe outside a stack of pipes still runs its command.
+(defmethod emit "bash_pipe" [{:keys [args]}]
+  (if (some? (:CMD args))
+    (str "process.stdout.write(" (emit (:CMD args)) ");")
+    ""))
+
 (defmethod emit "bash_if" [{:keys [args]}]
   (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")
-        then (str/join "\n" (map emit (:THEN args)))]
+        then (emit-stmts (:THEN args))]
     (str "if (" cond ") {\n"
          (indent then)
          "\n}")))

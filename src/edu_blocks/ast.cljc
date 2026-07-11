@@ -19,6 +19,7 @@
    "bash_head"      {:inputs [:N :FILE]}
    "bash_grep"      {:inputs [:PATTERN :FILE]}
    "bash_run"       {:inputs [:CMD]}
+   "bash_pipe"      {:inputs [:CMD]}
    "bash_if"          {:inputs [:COND] :stmts [:THEN]}
    "bash_compare"     {:fields [:OP] :inputs [:A :B]}
    "bash_number"      {:fields [:NUM]}

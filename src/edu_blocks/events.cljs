@@ -62,9 +62,8 @@
         console #js {:log (fn [x] (swap! buf str x "\n"))}
         process #js {:stdout #js {:write (fn [x] (swap! buf str x))}}
         cat     (fn [path] (file-text fs-tree "cat" path))
-        head    (fn [n path] (fs/head-text n (file-text fs-tree "head" path)))
-        grep    (fn [pattern path]
-                  (fs/grep-text pattern (file-text fs-tree "grep" path)))
+        head    (fn [n text] (fs/head-text n text))
+        grep    (fn [pattern text] (fs/grep-text pattern text))
         seq*    (fn [from to] (fs/seq-text from to))]
     (try
       ((js/Function. "console" "process" "cat" "head" "grep" "seq" code)

@@ -6,25 +6,25 @@
   (clj->js
    [{:type        "bash_script"
      :message0    "script %1"
-     :args0       [{:type "input_statement" :name "STMTS"}]
+     :args0       [{:type "input_statement" :name "STMTS" :check "Stmt"}]
      :colour      290}
     {:type              "bash_echo"
      :message0          "echo %1 newline %2"
      :args0             [{:type "input_value" :name "VALUE" :check "String"}
                          {:type "field_checkbox" :name "NEWLINE" :checked true}]
      :inputsInline      true
-     :previousStatement nil
-     :nextStatement     nil
+     :previousStatement "Stmt"
+     :nextStatement     "Stmt"
      :colour            160}
     {:type              "bash_for"
      :message0          "for %1 in %2"
      :args0             [{:type "field_input" :name "VAR" :text "i"}
                          {:type "input_value" :name "LIST" :check "WordList"}]
      :message1          "do %1"
-     :args1             [{:type "input_statement" :name "BODY"}]
+     :args1             [{:type "input_statement" :name "BODY" :check "Stmt"}]
      :inputsInline      true
-     :previousStatement nil
-     :nextStatement     nil
+     :previousStatement "Stmt"
+     :nextStatement     "Stmt"
      :colour            120}
     {:type    "bash_string"
      :message0 "\"%1\""
@@ -41,8 +41,8 @@
      :args0             [{:type "field_input" :name "VAR" :text "x"}
                          {:type "input_value" :name "VALUE" :check ["String" "Number"]}]
      :inputsInline      true
-     :previousStatement nil
-     :nextStatement     nil
+     :previousStatement "Stmt"
+     :nextStatement     "Stmt"
      :colour            330}
     {:type         "bash_subst"
      :message0     "$( %1 )"
@@ -92,17 +92,25 @@
      :message0          "run %1"
      :args0             [{:type "input_value" :name "CMD" :check "Command"}]
      :inputsInline      true
-     :previousStatement nil
-     :nextStatement     nil
-     :tooltip           "Runs a command and prints its output."
+     :previousStatement "Stmt"
+     :nextStatement     ["Stmt" "PipeStage"]
+     :tooltip           "Runs a command; add \"outputting to\" blocks below to pipe its output onward."
+     :colour            180}
+    {:type              "bash_pipe"
+     :message0          "outputting to %1"
+     :args0             [{:type "input_value" :name "CMD" :check "Command"}]
+     :inputsInline      true
+     :previousStatement "PipeStage"
+     :nextStatement     ["Stmt" "PipeStage"]
+     :tooltip           "Continues a pipeline; only attaches below a \"run\" or another \"outputting to\" block."
      :colour            180}
     {:type              "bash_if"
      :message0          "if %1"
      :args0             [{:type "input_value" :name "COND" :check "Condition"}]
      :message1          "then %1"
-     :args1             [{:type "input_statement" :name "THEN"}]
-     :previousStatement nil
-     :nextStatement     nil
+     :args1             [{:type "input_statement" :name "THEN" :check "Stmt"}]
+     :previousStatement "Stmt"
+     :nextStatement     "Stmt"
      :colour            60}
     {:type         "bash_compare"
      :message0     "%1 %2 %3 %4"
@@ -158,15 +166,12 @@
                                          :fields {:TEXT "/home/alice/notes.txt"}}}}}
                {:kind   "block"
                 :type   "bash_head"
-                :inputs {:N    {:shadow {:type "bash_number" :fields {:NUM 2}}}
-                         :FILE {:shadow {:type   "bash_string"
-                                         :fields {:TEXT "/home/alice/notes.txt"}}}}}
+                :inputs {:N {:shadow {:type "bash_number" :fields {:NUM 2}}}}}
                {:kind   "block"
                 :type   "bash_grep"
-                :inputs {:PATTERN {:shadow {:type "bash_string" :fields {:TEXT "milk"}}}
-                         :FILE    {:shadow {:type   "bash_string"
-                                            :fields {:TEXT "/home/alice/notes.txt"}}}}}
+                :inputs {:PATTERN {:shadow {:type "bash_string" :fields {:TEXT "milk"}}}}}
                {:kind "block" :type "bash_run"}
+               {:kind "block" :type "bash_pipe"}
                {:kind "block" :type "bash_if"}
                {:kind "block" :type "bash_compare"}
                {:kind "block" :type "bash_number"}

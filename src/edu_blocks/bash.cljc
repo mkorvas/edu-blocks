@@ -5,9 +5,32 @@
 
 (defmethod emit nil [_] "")
 
+(defn- group-pipes
+  "Groups a bash_run followed by zero or more bash_pipe blocks into
+   a pipeline. Returns a seq of [:pipe [run pipe ...]] or [:stmt b]."
+  [stmts]
+  (reduce (fn [acc s]
+            (case (:type s)
+              "bash_run"  (conj acc [:pipe [s]])
+              "bash_pipe" (if (= :pipe (first (peek acc)))
+                            (update-in acc [(dec (count acc)) 1] conj s)
+                            (conj acc [:stmt s]))
+              (conj acc [:stmt s])))
+          []
+          stmts))
+
+(declare emit-stmts)
+
+(defn- emit-group [[kind v]]
+  (case kind
+    :stmt (emit v)
+    :pipe (str/join " | " (map #(emit (:CMD (:args %))) v))))
+
+(defn- emit-stmts [stmts]
+  (str/join "\n" (map emit-group (group-pipes stmts))))
+
 (defmethod emit "bash_script" [{:keys [args]}]
-  (str "#!/bin/bash\n"
-       (str/join "\n" (map emit (:STMTS args)))))
+  (str "#!/bin/bash\n" (emit-stmts (:STMTS args))))
 
 (defmethod emit "bash_echo" [{:keys [args]}]
   (str "echo "
@@ -20,9 +43,7 @@
        (str/join "\n")))
 
 (defmethod emit "bash_for" [{:keys [args]}]
-  (let [body (if (seq (:BODY args))
-               (str/join "\n" (map emit (:BODY args)))
-               ":")]
+  (let [body (if (seq (:BODY args)) (emit-stmts (:BODY args)) ":")]
     (str "for " (:VAR args) " in " (emit (:LIST args)) "; do\n"
          (indent body)
          "\ndone")))
@@ -57,19 +78,23 @@
   (str "cat " (emit (:FILE args))))
 
 (defmethod emit "bash_head" [{:keys [args]}]
-  (str "head -n " (emit (:N args)) " " (emit (:FILE args))))
+  (str "head -n " (emit (:N args))
+       (when (some? (:FILE args)) (str " " (emit (:FILE args))))))
 
 (defmethod emit "bash_grep" [{:keys [args]}]
-  (str "grep " (emit (:PATTERN args)) " " (emit (:FILE args))))
+  (str "grep " (emit (:PATTERN args))
+       (when (some? (:FILE args)) (str " " (emit (:FILE args))))))
 
 (defmethod emit "bash_run" [{:keys [args]}]
   (emit (:CMD args)))
 
+;; A stray bash_pipe outside a stack of pipes still runs its command.
+(defmethod emit "bash_pipe" [{:keys [args]}]
+  (emit (:CMD args)))
+
 (defmethod emit "bash_if" [{:keys [args]}]
   (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")
-        then (if (seq (:THEN args))
-               (str/join "\n" (map emit (:THEN args)))
-               ":")]
+        then (if (seq (:THEN args)) (emit-stmts (:THEN args)) ":")]
     (str "if " cond "; then\n"
          (indent then)
          "\nfi")))

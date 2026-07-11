@@ -8,14 +8,14 @@
      :message0    "script %1"
      :args0       [{:type "input_statement" :name "STMTS" :check "Stmt"}]
      :colour      290}
-    {:type              "bash_echo"
-     :message0          "echo %1 newline %2"
-     :args0             [{:type "input_value" :name "VALUE" :check "String"}
-                         {:type "field_checkbox" :name "NEWLINE" :checked true}]
-     :inputsInline      true
-     :previousStatement "Stmt"
-     :nextStatement     "Stmt"
-     :colour            160}
+    {:type         "bash_echo"
+     :message0     "echo %1 newline %2"
+     :args0        [{:type "input_value" :name "VALUE" :check "String"}
+                    {:type "field_checkbox" :name "NEWLINE" :checked true}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Prints a value; wrap in \"run\" to print it as a statement."
+     :colour       160}
     {:type              "bash_for"
      :message0          "for %1 in %2"
      :args0             [{:type "field_input" :name "VAR" :text "i"}
@@ -44,20 +44,18 @@
      :previousStatement "Stmt"
      :nextStatement     "Stmt"
      :colour            330}
-    {:type         "bash_subst"
-     :message0     "$( %1 )"
-     :args0        [{:type "input_value" :name "CMD" :check "Command"}]
-     :inputsInline true
-     :output       "WordList"
-     :tooltip      "The output of a command, split into words."
-     :colour       40}
-    {:type         "bash_subst_str"
-     :message0     "\"$( %1 )\""
-     :args0        [{:type "input_value" :name "CMD" :check "Command"}]
-     :inputsInline true
-     :output       "String"
-     :tooltip      "The output of a command, as one text value."
-     :colour       40}
+    {:type     "bash_subst"
+     :message0 "$( %1 )"
+     :args0    [{:type "input_statement" :name "CMD" :check "Stmt"}]
+     :output   "WordList"
+     :tooltip  "The output of a command or pipeline, split into words."
+     :colour   40}
+    {:type     "bash_subst_str"
+     :message0 "\"$( %1 )\""
+     :args0    [{:type "input_statement" :name "CMD" :check "Stmt"}]
+     :output   "String"
+     :tooltip  "The output of a command or pipeline, as one text value."
+     :colour   40}
     {:type         "bash_seq"
      :message0     "seq %1 .. %2"
      :args0        [{:type "input_value" :name "FROM" :check ["Number" "String"]}

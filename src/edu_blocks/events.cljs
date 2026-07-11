@@ -55,22 +55,31 @@
 
 (defn eval-js
   "Evaluates JS code with console.log and process.stdout.write redirected
-   into a buffer, and with command helpers (cat, head, grep, seq) backed
-   by the virtual file tree; returns the captured output."
+   into a buffer stack (so nested captures for $(...) get their own),
+   and with command helpers (cat, head, grep, seq) backed by the virtual
+   file tree; returns the outer buffer once execution ends."
   [code fs-tree]
-  (let [buf     (atom "")
-        console #js {:log (fn [x] (swap! buf str x "\n"))}
-        process #js {:stdout #js {:write (fn [x] (swap! buf str x))}}
+  (let [bufs    (atom [""])
+        append! (fn [s] (swap! bufs update (dec (count @bufs)) str s))
+        console #js {:log (fn [x] (append! (str x "\n")))}
+        process #js {:stdout #js {:write (fn [x] (append! x))}}
         cat     (fn [path] (file-text fs-tree "cat" path))
         head    (fn [n text] (fs/head-text n text))
         grep    (fn [pattern text] (fs/grep-text pattern text))
-        seq*    (fn [from to] (fs/seq-text from to))]
+        seq*    (fn [from to] (fs/seq-text from to))
+        capture (fn [f]
+                  (swap! bufs conj "")
+                  (try
+                    (f)
+                    (peek @bufs)
+                    (finally
+                      (swap! bufs pop))))]
     (try
-      ((js/Function. "console" "process" "cat" "head" "grep" "seq" code)
-       console process cat head grep seq*)
+      ((js/Function. "console" "process" "cat" "head" "grep" "seq" "capture" code)
+       console process cat head grep seq* capture)
       (catch :default e
-        (swap! buf str "Error: " (ex-message e))))
-    @buf))
+        (append! (str "Error: " (ex-message e)))))
+    (first @bufs)))
 
 (rf/reg-fx
  ::eval-js

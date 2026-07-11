@@ -45,9 +45,12 @@
   (emit-stmts (:STMTS args)))
 
 (defmethod emit "bash_echo" [{:keys [args]}]
-  (if (false? (:NEWLINE args))
-    (str "process.stdout.write(" (emit (:VALUE args)) ");")
-    (str "console.log(" (emit (:VALUE args)) ");")))
+  ;; As a Command, echo evaluates to the text it would have printed
+  ;; (with a trailing newline unless "newline" is off).
+  (let [v (emit (:VALUE args))]
+    (if (false? (:NEWLINE args))
+      (str "String(" v ")")
+      (str "(String(" v ") + \"\\n\")"))))
 
 (defn- indent [s]
   (->> (str/split-lines s)
@@ -80,17 +83,19 @@
 ;; Commands translate to sandbox-provided helper functions returning
 ;; their stdout as text, like the Bash commands they mirror.
 
+(defn- capture-body [stmts]
+  ;; The sandbox helper "capture" runs its function argument with the
+  ;; script's stdout redirected to a fresh buffer, then returns that
+  ;; buffer's contents.
+  (str "capture(function () {\n" (indent (emit-stmts stmts)) "\n})"))
+
 (defmethod emit "bash_subst" [{:keys [args]}]
   ;; Unquoted $(...) in Bash splits the output into words.
-  (if (some? (:CMD args))
-    (str (emit (:CMD args)) ".split(/\\s+/).filter(Boolean)")
-    "[]"))
+  (str (capture-body (:CMD args)) ".split(/\\s+/).filter(Boolean)"))
 
 (defmethod emit "bash_subst_str" [{:keys [args]}]
   ;; "$(...)" in Bash yields the output verbatim, minus trailing newlines.
-  (if (some? (:CMD args))
-    (str (emit (:CMD args)) ".replace(/\\n+$/, \"\")")
-    "\"\""))
+  (str (capture-body (:CMD args)) ".replace(/\\n+$/, \"\")"))
 
 (defmethod emit "bash_seq" [{:keys [args]}]
   (str "seq(Number(" (emit (:FROM args)) "), Number(" (emit (:TO args)) "))"))

@@ -132,8 +132,17 @@
 (defmethod emit "bash_arith" [expr]
   (str "$(( " (arith-inner expr) " ))"))
 
+(defn- arg-names [func-def-args]
+  (->> (some-> func-def-args :ARGS :args :ARGS)
+       (keep #(some-> % :args :NAME))
+       (remove str/blank?)))
+
 (defmethod emit "bash_func_def" [{:keys [args]}]
-  (let [body (if (seq (:BODY args)) (emit-stmts (:BODY args)) ":")]
+  (let [preamble (->> (arg-names args)
+                      (map-indexed (fn [i n] (str "local " n "=\"$" (inc i) "\"")))
+                      (str/join "\n"))
+        body     (if (seq (:BODY args)) (emit-stmts (:BODY args)) ":")
+        body     (if (seq preamble) (str preamble "\n" body) body)]
     (str (:NAME args) "() {\n" (indent body) "\n}")))
 
 (defmethod emit "bash_func_call" [{:keys [args]}]

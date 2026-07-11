@@ -182,14 +182,24 @@
       (str "Math.trunc(" a " / " b ")")
       (str "(" a " " ({"ADD" "+" "SUB" "-" "MUL" "*" "MOD" "%"} op) " " b ")"))))
 
+(defn- arg-names [func-def-args]
+  (->> (some-> func-def-args :ARGS :args :ARGS)
+       (keep #(some-> % :args :NAME))
+       (remove str/blank?)))
+
 (defmethod emit "bash_func_def" [{:keys [args]}]
   ;; A function returns its captured stdout as text, matching how bash
   ;; functions are consumed by $() and pipelines.
-  (str "var " (:NAME args) " = function (...__args) {\n"
-       (indent (str "return capture(function () {\n"
-                    (indent (emit-stmts (:BODY args)))
-                    "\n});"))
-       "\n};"))
+  (let [preamble (->> (arg-names args)
+                      (map-indexed (fn [i n] (str "var " n " = __args[" i "] ?? \"\";")))
+                      (str/join "\n"))
+        body     (emit-stmts (:BODY args))
+        body     (if (seq preamble) (str preamble "\n" body) body)]
+    (str "var " (:NAME args) " = function (...__args) {\n"
+         (indent (str "return capture(function () {\n"
+                      (indent body)
+                      "\n});"))
+         "\n};")))
 
 (defmethod emit "bash_func_call" [{:keys [args]}]
   (let [a (if (some? (:ARGS args)) (emit (:ARGS args)) "[]")]

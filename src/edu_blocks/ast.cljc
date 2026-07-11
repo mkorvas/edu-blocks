@@ -25,8 +25,10 @@
    "bash_number"      {:fields [:NUM]}
    "bash_compare_num" {:fields [:OP] :inputs [:A :B]}
    "bash_arith"       {:fields [:OP] :inputs [:A :B]}
-   "bash_func_def"    {:fields [:NAME] :stmts [:BODY]}
-   "bash_func_call"   {:fields [:NAME] :inputs [:ARGS]}})
+   "bash_func_def"    {:fields [:NAME] :inputs [:ARGS] :stmts [:BODY]}
+   "bash_func_call"   {:fields [:NAME] :inputs [:ARGS]}
+   "bash_arg_list"    {:varargs [:ARGS]}
+   "bash_arg_name"    {:fields [:NAME]}})
 
 (declare bky-block->ast)
 

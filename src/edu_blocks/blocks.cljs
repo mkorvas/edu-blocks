@@ -1,5 +1,6 @@
 (ns edu-blocks.blocks
   (:require ["blockly" :as b]
+            ["/blocks/arg_list" :refer (argListBlock)]
             ["/blocks/word_list" :refer (wordListBlock)]))
 
 (def ^:private configs
@@ -140,14 +141,22 @@
      :tooltip      "Arithmetic on integers; division truncates toward zero."
      :colour       210}
     {:type              "bash_func_def"
-     :message0          "function %1"
-     :args0             [{:type "field_input" :name "NAME" :text "greet"}]
+     :message0          "function %1 %2"
+     :args0             [{:type "field_input" :name "NAME" :text "greet"}
+                         {:type "input_value" :name "ARGS" :check "ArgList"}]
      :message1          "%1"
      :args1             [{:type "input_statement" :name "BODY" :check "Stmt"}]
+     :inputsInline      true
      :previousStatement "Stmt"
      :nextStatement     "Stmt"
-     :tooltip           "Defines a function; arguments are accessible inside as $1, $2, ..."
+     :tooltip           "Defines a function; declared args become local variables in the body, alongside $1, $2, ..."
      :colour            290}
+    {:type    "bash_arg_name"
+     :message0 "%1"
+     :args0   [{:type "field_input" :name "NAME" :text "x"}]
+     :output  "ArgName"
+     :tooltip "Names a positional argument; becomes a local variable in the function body."
+     :colour  290}
     {:type         "bash_func_call"
      :message0     "call %1 with %2"
      :args0        [{:type "field_input" :name "NAME" :text "greet"}
@@ -208,9 +217,12 @@
                          :B {:shadow {:type "bash_number" :fields {:NUM 2}}}}}
                {:kind "block" :type "bash_compare_num"}
                {:kind "block" :type "bash_func_def"}
+               {:kind "block" :type "bash_arg_list"}
+               {:kind "block" :type "bash_arg_name"}
                {:kind "block" :type "bash_func_call"}]}))
 
 (defn define-blocks! []
   (let [defs (b/common.createBlockDefinitionsFromJsonArray configs)]
     (set! (.-bash_word_list defs) wordListBlock)
+    (set! (.-bash_arg_list defs) argListBlock)
     (b/common.defineBlocks defs)))

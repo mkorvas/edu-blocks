@@ -129,6 +129,18 @@
      :args0   [{:type "field_number" :name "NUM" :value 0}]
      :output  ["Number" "String"]
      :colour  210}
+    {:type         "bash_arith"
+     :message0     "%1 %2 %3"
+     :args0        [{:type "input_value" :name "A" :check ["Number" "String"]}
+                    {:type    "field_dropdown"
+                     :name    "OP"
+                     :options [["+" "ADD"] ["−" "SUB"] ["×" "MUL"]
+                               ["/" "DIV"] ["mod" "MOD"]]}
+                    {:type "input_value" :name "B" :check ["Number" "String"]}]
+     :inputsInline true
+     :output       ["Number" "String"]
+     :tooltip      "Arithmetic on integers; division truncates toward zero."
+     :colour       210}
     {:type         "bash_compare_num"
      :message0     "%1 %2 %3 %4"
      :args0        [{:type "input_value" :name "A" :check ["Number" "String"]}
@@ -175,6 +187,10 @@
                {:kind "block" :type "bash_if"}
                {:kind "block" :type "bash_compare"}
                {:kind "block" :type "bash_number"}
+               {:kind   "block"
+                :type   "bash_arith"
+                :inputs {:A {:shadow {:type "bash_number" :fields {:NUM 1}}}
+                         :B {:shadow {:type "bash_number" :fields {:NUM 2}}}}}
                {:kind "block" :type "bash_compare_num"}]}))
 
 (defn define-blocks! []

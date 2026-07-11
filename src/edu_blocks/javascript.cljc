@@ -161,5 +161,14 @@
              "GT" ">" "GE" ">="} (:OP args))]
     (str "Number(" (emit (:A args)) ") " op " Number(" (emit (:B args)) ")")))
 
+(defmethod emit "bash_arith" [{:keys [args]}]
+  ;; Bash arithmetic is integer-only, so / truncates toward zero.
+  (let [a (str "Number(" (emit (:A args)) ")")
+        b (str "Number(" (emit (:B args)) ")")
+        op (:OP args)]
+    (if (= "DIV" op)
+      (str "Math.trunc(" a " / " b ")")
+      (str "(" a " " ({"ADD" "+" "SUB" "-" "MUL" "*" "MOD" "%"} op) " " b ")"))))
+
 (defmethod emit :default [{:keys [type]}]
   (str "// unknown block: " type))

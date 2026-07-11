@@ -112,5 +112,25 @@
              "GT" "-gt" "GE" "-ge"} (:OP args))]
     (str "[ " (emit (:A args)) " " op " " (emit (:B args)) " ]")))
 
+(defn- arith-op [op]
+  ({"ADD" "+" "SUB" "-" "MUL" "*" "DIV" "/" "MOD" "%"} op))
+
+(declare arith-inner)
+
+(defn- arith-operand [x]
+  ;; A nested arithmetic sub-expression is bracketed with plain parens
+  ;; to preserve the user's precedence, without a redundant $((..)).
+  (if (= "bash_arith" (:type x))
+    (str "(" (arith-inner x) ")")
+    (emit x)))
+
+(defn- arith-inner [{:keys [args]}]
+  (str (arith-operand (:A args))
+       " " (arith-op (:OP args)) " "
+       (arith-operand (:B args))))
+
+(defmethod emit "bash_arith" [expr]
+  (str "$(( " (arith-inner expr) " ))"))
+
 (defmethod emit :default [{:keys [type]}]
   (str "# unknown block: " type))

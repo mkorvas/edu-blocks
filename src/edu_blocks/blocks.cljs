@@ -139,6 +139,23 @@
      :output       ["Number" "String"]
      :tooltip      "Arithmetic on integers; division truncates toward zero."
      :colour       210}
+    {:type              "bash_func_def"
+     :message0          "function %1"
+     :args0             [{:type "field_input" :name "NAME" :text "greet"}]
+     :message1          "%1"
+     :args1             [{:type "input_statement" :name "BODY" :check "Stmt"}]
+     :previousStatement "Stmt"
+     :nextStatement     "Stmt"
+     :tooltip           "Defines a function; arguments are accessible inside as $1, $2, ..."
+     :colour            290}
+    {:type         "bash_func_call"
+     :message0     "call %1 with %2"
+     :args0        [{:type "field_input" :name "NAME" :text "greet"}
+                    {:type "input_value" :name "ARGS" :check "WordList"}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Calls a function with the given argument words."
+     :colour       290}
     {:type         "bash_compare_num"
      :message0     "%1 %2 %3 %4"
      :args0        [{:type "input_value" :name "A" :check ["Number" "String"]}
@@ -189,7 +206,9 @@
                 :type   "bash_arith"
                 :inputs {:A {:shadow {:type "bash_number" :fields {:NUM 1}}}
                          :B {:shadow {:type "bash_number" :fields {:NUM 2}}}}}
-               {:kind "block" :type "bash_compare_num"}]}))
+               {:kind "block" :type "bash_compare_num"}
+               {:kind "block" :type "bash_func_def"}
+               {:kind "block" :type "bash_func_call"}]}))
 
 (defn define-blocks! []
   (let [defs (b/common.createBlockDefinitionsFromJsonArray configs)]

@@ -42,7 +42,9 @@
   (str/join "\n" (map emit-group (group-pipes stmts))))
 
 (defmethod emit "bash_script" [{:keys [args]}]
-  (emit-stmts (:STMTS args)))
+  ;; __args holds a bash function's positional parameters; the script-
+  ;; level empty default makes $1, $2, ... expand to "" outside a call.
+  (str "var __args = [];\n" (emit-stmts (:STMTS args))))
 
 (defmethod emit "bash_echo" [{:keys [args]}]
   ;; As a Command, echo evaluates to the text it would have printed
@@ -68,7 +70,12 @@
   (pr-str (:TEXT args)))
 
 (defmethod emit "bash_var" [{:keys [args]}]
-  (:VAR args))
+  ;; Numeric $1, $2, ... refer to a function's positional parameters
+  ;; via a rest-param shadowing the top-level __args.
+  (let [v (:VAR args)]
+    (if (re-matches #"\d+" v)
+      (str "(__args[" (dec (parse-long v)) "] ?? \"\")")
+      v)))
 
 (defmethod emit "bash_assign" [{:keys [args]}]
   ;; var, not let: repeated set-blocks for the same name would make
@@ -174,6 +181,19 @@
     (if (= "DIV" op)
       (str "Math.trunc(" a " / " b ")")
       (str "(" a " " ({"ADD" "+" "SUB" "-" "MUL" "*" "MOD" "%"} op) " " b ")"))))
+
+(defmethod emit "bash_func_def" [{:keys [args]}]
+  ;; A function returns its captured stdout as text, matching how bash
+  ;; functions are consumed by $() and pipelines.
+  (str "var " (:NAME args) " = function (...__args) {\n"
+       (indent (str "return capture(function () {\n"
+                    (indent (emit-stmts (:BODY args)))
+                    "\n});"))
+       "\n};"))
+
+(defmethod emit "bash_func_call" [{:keys [args]}]
+  (let [a (if (some? (:ARGS args)) (emit (:ARGS args)) "[]")]
+    (str (:NAME args) "(..." a ")")))
 
 (defmethod emit :default [{:keys [type]}]
   (str "// unknown block: " type))

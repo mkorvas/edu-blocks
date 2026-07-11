@@ -24,7 +24,9 @@
    "bash_compare"     {:fields [:OP] :inputs [:A :B]}
    "bash_number"      {:fields [:NUM]}
    "bash_compare_num" {:fields [:OP] :inputs [:A :B]}
-   "bash_arith"       {:fields [:OP] :inputs [:A :B]}})
+   "bash_arith"       {:fields [:OP] :inputs [:A :B]}
+   "bash_func_def"    {:fields [:NAME] :stmts [:BODY]}
+   "bash_func_call"   {:fields [:NAME] :inputs [:ARGS]}})
 
 (declare bky-block->ast)
 

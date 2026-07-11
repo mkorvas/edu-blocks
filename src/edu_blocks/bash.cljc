@@ -132,5 +132,13 @@
 (defmethod emit "bash_arith" [expr]
   (str "$(( " (arith-inner expr) " ))"))
 
+(defmethod emit "bash_func_def" [{:keys [args]}]
+  (let [body (if (seq (:BODY args)) (emit-stmts (:BODY args)) ":")]
+    (str (:NAME args) "() {\n" (indent body) "\n}")))
+
+(defmethod emit "bash_func_call" [{:keys [args]}]
+  (let [a (when (some? (:ARGS args)) (emit (:ARGS args)))]
+    (if (seq a) (str (:NAME args) " " a) (:NAME args))))
+
 (defmethod emit :default [{:keys [type]}]
   (str "# unknown block: " type))

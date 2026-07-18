@@ -50,7 +50,13 @@
     :contents [{:kind "block" :type "bash_script"}
                {:kind "block" :type "bash_run"}
                {:kind "block" :type "bash_echo"}
-               {:kind "block" :type "bash_string"}]}
+               {:kind "block" :type "bash_string"}
+               ;; run + echo, ready to print
+               {:kind   "block"
+                :type   "bash_run"
+                :inputs {:CMD {:block {:type   "bash_echo"
+                                       :inputs {:VALUE {:shadow {:type   "bash_string"
+                                                                 :fields {:TEXT "Hello, world!"}}}}}}}}]}
    {:name "Variables" :colour 330
     :contents [{:kind "block" :type "bash_assign"}
                {:kind "block" :type "bash_var"}]}
@@ -76,13 +82,35 @@
                 :inputs {:FROM {:shadow {:type "bash_number" :fields {:NUM 1}}}
                          :TO   {:shadow {:type "bash_number" :fields {:NUM 10}}}}}]}
    {:name "Pipelines" :colour 180
-    :contents [{:kind "block" :type "bash_pipe"}]}
+    :contents [{:kind "block" :type "bash_pipe"}
+               ;; a two-stage pipeline: cat a file, grep its lines
+               {:kind   "block"
+                :type   "bash_run"
+                :inputs {:CMD {:block {:type   "bash_cat"
+                                       :inputs {:FILE {:shadow {:type   "bash_string"
+                                                                :fields {:TEXT "/home/alice/notes.txt"}}}}}}}
+                :next   {:block {:type   "bash_pipe"
+                                 :inputs {:CMD {:block {:type   "bash_grep"
+                                                        :inputs {:PATTERN {:shadow {:type   "bash_string"
+                                                                                    :fields {:TEXT "milk"}}}}}}}}}}]}
    {:name "Command output" :colour 40
     :contents [{:kind "block" :type "bash_subst"}
                {:kind "block" :type "bash_subst_str"}
                {:kind "block" :type "bash_word_list"}]}
    {:name "Loops" :colour 120
-    :contents [{:kind "block" :type "bash_for"}]}
+    :contents [{:kind "block" :type "bash_for"}
+               ;; for i in $(seq 1..10), echoing $i
+               {:kind   "block"
+                :type   "bash_for"
+                :inputs {:LIST {:block {:type   "bash_subst"
+                                        :inputs {:CMD {:block {:type   "bash_run"
+                                                               :inputs {:CMD {:block {:type   "bash_seq"
+                                                                                      :inputs {:FROM {:shadow {:type "bash_number" :fields {:NUM 1}}}
+                                                                                               :TO   {:shadow {:type "bash_number" :fields {:NUM 10}}}}}}}}}}}}
+                         :BODY {:block {:type   "bash_run"
+                                        :inputs {:CMD {:block {:type   "bash_echo"
+                                                               :inputs {:VALUE {:block {:type   "bash_var"
+                                                                                        :fields {:VAR "i"}}}}}}}}}}}]}
    {:name "Decisions" :colour 60
     :contents [{:kind "block" :type "bash_if"}
                {:kind "block" :type "bash_compare"}
@@ -91,7 +119,26 @@
     :contents [{:kind "block" :type "bash_func_def"}
                {:kind "block" :type "bash_arg_list"}
                {:kind "block" :type "bash_arg_name"}
-               {:kind "block" :type "bash_func_call"}]}])
+               {:kind "block" :type "bash_func_call"}
+               ;; a greet(who) function echoing its argument
+               {:kind   "block"
+                :type   "bash_func_def"
+                :fields {:NAME "greet"}
+                :inputs {:ARGS {:block {:type   "bash_arg_list"
+                                        :inputs {:ADD0 {:block {:type   "bash_arg_name"
+                                                                :fields {:NAME "who"}}}}}}
+                         :BODY {:block {:type   "bash_run"
+                                        :inputs {:CMD {:block {:type   "bash_echo"
+                                                               :inputs {:VALUE {:block {:type   "bash_var"
+                                                                                        :fields {:VAR "who"}}}}}}}}}}}
+               ;; a matching call, ready to run
+               {:kind   "block"
+                :type   "bash_run"
+                :inputs {:CMD {:block {:type   "bash_func_call"
+                                       :fields {:NAME "greet"}
+                                       :inputs {:ARGS {:block {:type   "bash_word_list"
+                                                               :inputs {:ADD0 {:block {:type   "bash_string"
+                                                                                       :fields {:TEXT "World"}}}}}}}}}}}]}])
 
 (defn entry-block-types
   "All block types a toolbox entry mentions, including nested blocks

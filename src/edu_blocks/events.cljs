@@ -6,6 +6,7 @@
     [edu-blocks.db :as db]
     [edu-blocks.fs :as fs]
     [edu-blocks.javascript :as javascript]
+    [edu-blocks.levels :as levels]
 ))
 
 (rf/reg-event-fx
@@ -14,10 +15,23 @@
    {:db db/default-db
     }))
 
-(rf/reg-event-db
+(rf/reg-fx
+ ::update-toolbox
+ (fn [{:keys [ws level]}]
+   (when ws
+     (.updateToolbox ^js ws (clj->js (levels/toolbox-for level))))))
+
+(rf/reg-event-fx
  ::ws-created
- (fn [db [_ ws observer]]
-   (update db :bky assoc :ws ws :observer observer)))
+ (fn [{:keys [db]} [_ ws observer]]
+   {:db (update db :bky assoc :ws ws :observer observer)
+    :fx [[::update-toolbox {:ws ws :level (:level db)}]]}))
+
+(rf/reg-event-fx
+ ::set-level
+ (fn [{:keys [db]} [_ level]]
+   {:db (assoc db :level level)
+    :fx [[::update-toolbox {:ws (get-in db [:bky :ws]) :level level}]]}))
 
 (rf/reg-event-db
  ::ws-modified

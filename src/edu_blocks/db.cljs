@@ -28,6 +28,7 @@
 (def default-db
 
   {:lang :bash ; the output language, :bash or :js
+   :level 1 ; current level, gating which blocks the toolbox offers
    :exec-output nil ; captured output of the last script run
    :fs-tree sample-fs-tree ; virtual file tree shown in the files panel
    :bky {

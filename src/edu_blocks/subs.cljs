@@ -15,6 +15,11 @@
    (:lang db)))
 
 (rf/reg-sub
+ ::level
+ (fn [db _]
+   (:level db)))
+
+(rf/reg-sub
  ::exec-output
  (fn [db _]
    (:exec-output db)))

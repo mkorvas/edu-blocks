@@ -3,7 +3,7 @@
    ["blockly" :as b]
    ["@blockly/block-dynamic-connection" :as b-dyna]
    [clojure.string :as str]
-   [re-com.core :refer [button h-box horizontal-bar-tabs]]
+   [re-com.core :refer [button h-box horizontal-bar-tabs single-dropdown]]
    [re-frame.core :as rf]
    [reagent.core :as r]
 
@@ -57,9 +57,37 @@
         (.disconnect observer)
         (.dispose ws)))))
 
+(def ^:private level-choices
+  (mapv (fn [{:keys [id label]}]
+          {:id id :label (str "Level " id " — " label)})
+        levels/levels))
+
+(defn level-bar []
+  (let [level @(rf/subscribe [::subs/level])]
+    [h-box
+     :align :center
+     :gap "12px"
+     :style {:padding       "6px 8px"
+             :background    "#f7f7f7"
+             :border-bottom "1px solid #ddd"}
+     :children
+     [[single-dropdown
+       :choices   level-choices
+       :model     level
+       :width     "240px"
+       :on-change #(rf/dispatch [::ev/set-level %])]
+      [:span {:style {:color "#666"}}
+       (:description (levels/level level))]]]))
+
 (defn blockly-pane []
-  [:div {:style {:flex "1 1 auto" :height "100%" :min-width 0}
-         :ref inject-blockly!}])
+  [:div {:style {:flex           "1 1 auto"
+                 :height         "100%"
+                 :min-width      0
+                 :display        "flex"
+                 :flex-direction "column"}}
+   [level-bar]
+   [:div {:style {:flex "1 1 auto" :min-height 0}
+          :ref inject-blockly!}]])
 
 (def langs
   [{:id :bash :label "Bash"}

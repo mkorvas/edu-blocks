@@ -1,6 +1,49 @@
 (ns edu-blocks.levels
-  "The toolbox, organized into categories of related blocks. Plain EDN;
-   pass the result through clj->js before handing it to Blockly.")
+  "The level progression (which blocks students have unlocked) and the
+   toolbox, organized into categories of related blocks. Plain EDN;
+   pass toolbox definitions through clj->js before handing them to
+   Blockly.")
+
+(def levels
+  "Each level lists the block types it introduces; a student at level N
+   has the union of levels 1..N available."
+  [{:id 1 :label "Hello, script"
+    :description "Print messages with echo."
+    :blocks #{"bash_script" "bash_run" "bash_echo" "bash_string"}}
+   {:id 2 :label "Variables"
+    :description "Store values and read them back."
+    :blocks #{"bash_assign" "bash_var"}}
+   {:id 3 :label "Numbers"
+    :description "Count and calculate."
+    :blocks #{"bash_number" "bash_arith"}}
+   {:id 4 :label "Files"
+    :description "Look into files with cat, head and grep."
+    :blocks #{"bash_cat" "bash_head" "bash_grep" "bash_seq"}}
+   {:id 5 :label "Pipelines"
+    :description "Send one command's output on to another."
+    :blocks #{"bash_pipe"}}
+   {:id 6 :label "Command output"
+    :description "Use a command's output as a value."
+    :blocks #{"bash_subst" "bash_subst_str" "bash_word_list"}}
+   {:id 7 :label "Loops"
+    :description "Repeat steps for every word in a list."
+    :blocks #{"bash_for"}}
+   {:id 8 :label "Decisions"
+    :description "Run steps only when a test passes."
+    :blocks #{"bash_if" "bash_compare" "bash_compare_num"}}
+   {:id 9 :label "Functions"
+    :description "Name a recipe and call it with arguments."
+    :blocks #{"bash_func_def" "bash_func_call" "bash_arg_list" "bash_arg_name"}}])
+
+(def max-level (:id (last levels)))
+
+(defn level [id]
+  (some #(when (= id (:id %)) %) levels))
+
+(defn unlocked-blocks
+  "The set of block types available at level-id."
+  [level-id]
+  (into #{} (mapcat :blocks) (filter #(<= (:id %) level-id) levels)))
 
 (def ^:private categories
   [{:name "Basics" :colour 180
@@ -50,6 +93,29 @@
                {:kind "block" :type "bash_arg_name"}
                {:kind "block" :type "bash_func_call"}]}])
 
-(def toolbox
-  {:kind "categoryToolbox"
-   :contents (mapv #(assoc % :kind "category") categories)})
+(defn entry-block-types
+  "All block types a toolbox entry mentions, including nested blocks
+   and shadows."
+  [entry]
+  (cond
+    (map? entry) (cond-> (into #{} (mapcat entry-block-types) (vals entry))
+                   (:type entry) (conj (:type entry)))
+    (coll? entry) (into #{} (mapcat entry-block-types) entry)
+    :else #{}))
+
+(defn toolbox-for
+  "The category toolbox for level-id: only entries whose blocks (incl.
+   nested ones) are all unlocked, with empty categories dropped."
+  [level-id]
+  (let [available (unlocked-blocks level-id)]
+    {:kind "categoryToolbox"
+     :contents
+     (into []
+           (keep (fn [category]
+                   (let [entries (filterv #(every? available (entry-block-types %))
+                                          (:contents category))]
+                     (when (seq entries)
+                       (assoc category :kind "category" :contents entries)))))
+           categories)}))
+
+(def toolbox (toolbox-for max-level))

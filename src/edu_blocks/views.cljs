@@ -7,14 +7,14 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
 
-   [edu-blocks.blocks :as blocks]
    [edu-blocks.events :as ev]
+   [edu-blocks.levels :as levels]
    [edu-blocks.subs :as subs]
    ))
 
 (def ws-config
   (clj->js
-   {:toolbox  blocks/toolbox
+   {:toolbox  levels/toolbox
     :grid     {:spacing 20 :length 3 :colour "#ccc" :snap true}
     :zoom     {:controls true}
     :trashcan true

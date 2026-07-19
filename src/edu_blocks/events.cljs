@@ -12,8 +12,11 @@
 (rf/reg-event-fx
  ::initialize-db
  (fn [_ _]
-   {:db db/default-db
-    }))
+   ;; ?unlock=all in the URL opens every level (for demonstrations).
+   (let [unlock-all? (= "all" (.get (js/URLSearchParams. js/window.location.search)
+                                    "unlock"))]
+     {:db (cond-> db/default-db
+            unlock-all? (assoc :unlocked levels/max-level))})))
 
 (rf/reg-fx
  ::update-toolbox
@@ -30,7 +33,7 @@
 (rf/reg-event-fx
  ::set-level
  (fn [{:keys [db]} [_ level]]
-   {:db (assoc db :level level)
+   {:db (assoc db :level level :challenge-result nil)
     :fx [[::update-toolbox {:ws (get-in db [:bky :ws]) :level level}]]}))
 
 (rf/reg-event-db
@@ -112,6 +115,24 @@
  ::script-ran
  (fn [db [_ output]]
    (assoc db :exec-output output)))
+
+(rf/reg-event-db
+ ::check-challenge
+ (fn [db _]
+   ;; Runs against the built-in sample tree (not an uploaded one), so
+   ;; file-based challenges stay deterministic.
+   (let [level     (:level db)
+         challenge (:challenge (levels/level level))
+         ast       (some-> (get-in db [:bky :json]) ast/bky-ws->ast)
+         output    (some-> ast javascript/emit (eval-js db/sample-fs-tree))
+         status    (if (nil? ast)
+                     :no-script
+                     (levels/check-challenge challenge ast output))]
+     (cond-> (assoc db
+                    :challenge-result {:level level :status status}
+                    :exec-output output)
+       (= :passed status)
+       (update :unlocked max (min levels/max-level (inc level)))))))
 
 (defn bky-js->clj [bky]
   (cond

@@ -29,6 +29,8 @@
 
   {:lang :bash ; the output language, :bash or :js
    :level 1 ; current level, gating which blocks the toolbox offers
+   :unlocked 1 ; highest level reached by passing challenges
+   :challenge-result nil ; {:level n :status :passed/:wrong-output/...}
    :exec-output nil ; captured output of the last script run
    :fs-tree sample-fs-tree ; virtual file tree shown in the files panel
    :bky {

@@ -62,22 +62,49 @@
           {:id id :label (str "Level " id " — " label)})
         levels/levels))
 
+(defn- challenge-feedback [{:keys [level status]}]
+  (case status
+    :passed         (if (< level levels/max-level)
+                      (str "Solved! Level " (inc level) " unlocked.")
+                      "Solved! You have finished all the levels.")
+    :wrong-output   "Not the expected output yet — check the run panel."
+    :missing-blocks "Right output, but solve it with this level's new blocks."
+    :no-script      "Add a script block first."))
+
 (defn level-bar []
-  (let [level @(rf/subscribe [::subs/level])]
-    [h-box
-     :align :center
-     :gap "12px"
-     :style {:padding       "6px 8px"
-             :background    "#f7f7f7"
-             :border-bottom "1px solid #ddd"}
-     :children
-     [[single-dropdown
-       :choices   level-choices
-       :model     level
-       :width     "240px"
-       :on-change #(rf/dispatch [::ev/set-level %])]
-      [:span {:style {:color "#666"}}
-       (:description (levels/level level))]]]))
+  (let [level    @(rf/subscribe [::subs/level])
+        unlocked @(rf/subscribe [::subs/unlocked])
+        result   @(rf/subscribe [::subs/challenge-result])
+        {:keys [description challenge]} (levels/level level)]
+    [:div {:style {:padding       "6px 8px"
+                   :background    "#f7f7f7"
+                   :border-bottom "1px solid #ddd"}}
+     [h-box
+      :align :center
+      :gap "12px"
+      :children
+      [[single-dropdown
+        :choices   (filterv #(<= (:id %) unlocked) level-choices)
+        :model     level
+        :width     "240px"
+        :on-change #(rf/dispatch [::ev/set-level %])]
+       [:span {:style {:color "#666"}} description]]]
+     [h-box
+      :align :center
+      :gap "12px"
+      :style {:margin-top "6px"}
+      :children
+      [[:span [:b "Challenge: "] (:task challenge)]
+       [button
+        :label    "Check"
+        :class    "btn-primary"
+        :style    {:padding "2px 10px"}
+        :on-click #(rf/dispatch [::ev/check-challenge])]
+       (when (= level (:level result))
+         [:span {:style {:color (if (= :passed (:status result))
+                                  "#2a7d2a"
+                                  "#b03030")}}
+          (challenge-feedback result)])]]]))
 
 (defn blockly-pane []
   [:div {:style {:flex           "1 1 auto"

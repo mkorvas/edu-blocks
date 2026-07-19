@@ -20,6 +20,16 @@
    (:level db)))
 
 (rf/reg-sub
+ ::unlocked
+ (fn [db _]
+   (:unlocked db)))
+
+(rf/reg-sub
+ ::challenge-result
+ (fn [db _]
+   (:challenge-result db)))
+
+(rf/reg-sub
  ::exec-output
  (fn [db _]
    (:exec-output db)))

@@ -6,34 +6,63 @@
 
 (def levels
   "Each level lists the block types it introduces; a student at level N
-   has the union of levels 1..N available."
+   has the union of levels 1..N available. Its :challenge gates the
+   next level: the script must print :expected and use the :requires
+   block types."
   [{:id 1 :label "Hello, script"
     :description "Print messages with echo."
-    :blocks #{"bash_script" "bash_run" "bash_echo" "bash_string"}}
+    :blocks #{"bash_script" "bash_run" "bash_echo" "bash_string"}
+    :challenge {:task     "Print Hello, world!"
+                :expected "Hello, world!\n"
+                :requires #{"bash_echo"}}}
    {:id 2 :label "Variables"
     :description "Store values and read them back."
-    :blocks #{"bash_assign" "bash_var"}}
+    :blocks #{"bash_assign" "bash_var"}
+    :challenge {:task     "Store Bob in a variable, then print the variable."
+                :expected "Bob\n"
+                :requires #{"bash_assign" "bash_var"}}}
    {:id 3 :label "Numbers"
     :description "Count and calculate."
-    :blocks #{"bash_number" "bash_arith"}}
+    :blocks #{"bash_number" "bash_arith"}
+    :challenge {:task     "Print the result of 6 × 7."
+                :expected "42\n"
+                :requires #{"bash_arith"}}}
    {:id 4 :label "Files"
     :description "Look into files with cat, head and grep."
-    :blocks #{"bash_cat" "bash_head" "bash_grep" "bash_seq"}}
+    :blocks #{"bash_cat" "bash_head" "bash_grep" "bash_seq"}
+    :challenge {:task     "Print the first 2 lines of /home/alice/notes.txt."
+                :expected "Remember to water the plants.\nBuy milk.\n"
+                :requires #{"bash_head"}}}
    {:id 5 :label "Pipelines"
     :description "Send one command's output on to another."
-    :blocks #{"bash_pipe"}}
+    :blocks #{"bash_pipe"}
+    :challenge {:task     "Using a pipeline, print only the line of /home/alice/notes.txt that mentions milk."
+                :expected "Buy milk.\n"
+                :requires #{"bash_pipe"}}}
    {:id 6 :label "Command output"
     :description "Use a command's output as a value."
-    :blocks #{"bash_subst" "bash_subst_str" "bash_word_list"}}
+    :blocks #{"bash_subst" "bash_subst_str" "bash_word_list"}
+    :challenge {:task     "Print the output of seq 1 .. 3 (three lines) with a single echo."
+                :expected "1\n2\n3\n"
+                :requires #{"bash_subst_str"}}}
    {:id 7 :label "Loops"
     :description "Repeat steps for every word in a list."
-    :blocks #{"bash_for"}}
+    :blocks #{"bash_for"}
+    :challenge {:task     "Using a loop, print the numbers 1 to 5, one per line."
+                :expected "1\n2\n3\n4\n5\n"
+                :requires #{"bash_for"}}}
    {:id 8 :label "Decisions"
     :description "Run steps only when a test passes."
-    :blocks #{"bash_if" "bash_compare" "bash_compare_num"}}
+    :blocks #{"bash_if" "bash_compare" "bash_compare_num"}
+    :challenge {:task     "Print only the numbers from 1 to 5 that are greater than 3."
+                :expected "4\n5\n"
+                :requires #{"bash_if" "bash_compare_num"}}}
    {:id 9 :label "Functions"
     :description "Name a recipe and call it with arguments."
-    :blocks #{"bash_func_def" "bash_func_call" "bash_arg_list" "bash_arg_name"}}])
+    :blocks #{"bash_func_def" "bash_func_call" "bash_arg_list" "bash_arg_name"}
+    :challenge {:task     "Define a function that prints its argument twice, and call it with Alice."
+                :expected "Alice\nAlice\n"
+                :requires #{"bash_func_def" "bash_func_call"}}}])
 
 (def max-level (:id (last levels)))
 
@@ -140,14 +169,14 @@
                                                                :inputs {:ADD0 {:block {:type   "bash_string"
                                                                                        :fields {:TEXT "World"}}}}}}}}}}}]}])
 
-(defn entry-block-types
-  "All block types a toolbox entry mentions, including nested blocks
-   and shadows."
-  [entry]
+(defn block-types
+  "All block types a nested structure mentions — works on toolbox
+   entries (incl. nested blocks and shadows) and on emitter ASTs."
+  [x]
   (cond
-    (map? entry) (cond-> (into #{} (mapcat entry-block-types) (vals entry))
-                   (:type entry) (conj (:type entry)))
-    (coll? entry) (into #{} (mapcat entry-block-types) entry)
+    (map? x) (cond-> (into #{} (mapcat block-types) (vals x))
+               (:type x) (conj (:type x)))
+    (coll? x) (into #{} (mapcat block-types) x)
     :else #{}))
 
 (defn toolbox-for
@@ -159,10 +188,20 @@
      :contents
      (into []
            (keep (fn [category]
-                   (let [entries (filterv #(every? available (entry-block-types %))
+                   (let [entries (filterv #(every? available (block-types %))
                                           (:contents category))]
                      (when (seq entries)
                        (assoc category :kind "category" :contents entries)))))
            categories)}))
 
 (def toolbox (toolbox-for max-level))
+
+(defn check-challenge
+  "Judges a script AST and its output against a challenge. Returns
+   :passed, :wrong-output, or :missing-blocks (right output without
+   using this level's new blocks)."
+  [{:keys [expected requires]} ast output]
+  (cond
+    (not= expected output)                        :wrong-output
+    (not (every? (block-types ast) requires))     :missing-blocks
+    :else                                         :passed))

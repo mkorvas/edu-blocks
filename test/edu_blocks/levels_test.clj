@@ -17,10 +17,10 @@
 
 (deftest toolbox-is-consistent
   (testing "every toolbox block (incl. nested and shadows) is unlocked at the max level"
-    (is (set/subset? (levels/entry-block-types levels/toolbox)
+    (is (set/subset? (levels/block-types levels/toolbox)
                      (levels/unlocked-blocks levels/max-level))))
   (testing "every defined block type appears in the toolbox"
-    (is (empty? (remove (levels/entry-block-types levels/toolbox)
+    (is (empty? (remove (levels/block-types levels/toolbox)
                         (keys ast/block-defs))))))
 
 (deftest each-level-enlarges-the-toolbox

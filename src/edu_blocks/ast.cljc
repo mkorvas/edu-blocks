@@ -17,7 +17,11 @@
    "bash_seq"       {:inputs [:FROM :TO]}
    "bash_cat"       {:inputs [:FILE]}
    "bash_head"      {:inputs [:N :FILE]}
+   "bash_tail"      {:inputs [:N :FILE]}
    "bash_grep"      {:inputs [:PATTERN :FILE]}
+   "bash_wc_l"      {:inputs [:FILE]}
+   "bash_sort"      {:inputs [:FILE]}
+   "bash_uniq"      {:inputs [:FILE]}
    "bash_run"       {:inputs [:CMD]}
    "bash_pipe"      {:inputs [:CMD]}
    "bash_if"          {:inputs [:COND] :stmts [:THEN]}

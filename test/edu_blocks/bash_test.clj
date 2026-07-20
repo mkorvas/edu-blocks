@@ -23,9 +23,19 @@
   (is (= "seq 2 5" (bash/emit (h/seq* (n 2) (n 5)))))
   (is (= "cat \"notes.txt\"" (bash/emit (h/cat* (s "notes.txt")))))
   (is (= "head -n 2 \"notes.txt\"" (bash/emit (h/head* (n 2) (s "notes.txt")))))
+  (is (= "tail -n 2 \"notes.txt\"" (bash/emit (h/tail* (n 2) (s "notes.txt")))))
+  (is (= "wc -l < \"notes.txt\"" (bash/emit (h/wc-l (s "notes.txt"))))
+      "wc reads a redirect so the file name is not printed")
+  (is (= "LC_ALL=C sort \"notes.txt\"" (bash/emit (h/sort* (s "notes.txt"))))
+      "sort is pinned to byte order")
+  (is (= "uniq \"notes.txt\"" (bash/emit (h/uniq* (s "notes.txt")))))
   (testing "an empty FILE socket reads stdin"
     (is (= "head -n 2" (bash/emit (h/head* (n 2) nil))))
-    (is (= "grep \"milk\"" (bash/emit (h/grep* (s "milk") nil))))))
+    (is (= "grep \"milk\"" (bash/emit (h/grep* (s "milk") nil))))
+    (is (= "tail -n 2" (bash/emit (h/tail* (n 2) nil))))
+    (is (= "wc -l" (bash/emit (h/wc-l nil))))
+    (is (= "LC_ALL=C sort" (bash/emit (h/sort* nil))))
+    (is (= "uniq" (bash/emit (h/uniq* nil))))))
 
 (deftest substitution
   (is (= "$(seq 3)" (bash/emit (h/subst (h/run (h/seq* (n 1) (n 3)))))))

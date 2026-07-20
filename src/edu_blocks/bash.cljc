@@ -85,6 +85,26 @@
   (str "grep " (emit (:PATTERN args))
        (when (some? (:FILE args)) (str " " (emit (:FILE args))))))
 
+(defmethod emit "bash_tail" [{:keys [args]}]
+  (str "tail -n " (emit (:N args))
+       (when (some? (:FILE args)) (str " " (emit (:FILE args))))))
+
+;; Redirect the file into wc so it does not print the file name
+;; alongside the count.
+(defmethod emit "bash_wc_l" [{:keys [args]}]
+  (str "wc -l"
+       (when (some? (:FILE args)) (str " < " (emit (:FILE args))))))
+
+;; Pin the sort order to plain byte order; the default is
+;; locale-dependent and would disagree with the JavaScript translation.
+(defmethod emit "bash_sort" [{:keys [args]}]
+  (str "LC_ALL=C sort"
+       (when (some? (:FILE args)) (str " " (emit (:FILE args))))))
+
+(defmethod emit "bash_uniq" [{:keys [args]}]
+  (str "uniq"
+       (when (some? (:FILE args)) (str " " (emit (:FILE args))))))
+
 (defmethod emit "bash_run" [{:keys [args]}]
   (emit (:CMD args)))
 

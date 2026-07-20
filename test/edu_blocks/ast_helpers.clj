@@ -23,6 +23,10 @@
 (defn cat* [file] {:type "bash_cat" :args {:FILE file}})
 (defn head* [n file] {:type "bash_head" :args {:N n :FILE file}})
 (defn grep* [pattern file] {:type "bash_grep" :args {:PATTERN pattern :FILE file}})
+(defn tail* [n file] {:type "bash_tail" :args {:N n :FILE file}})
+(defn wc-l [file] {:type "bash_wc_l" :args {:FILE file}})
+(defn sort* [file] {:type "bash_sort" :args {:FILE file}})
+(defn uniq* [file] {:type "bash_uniq" :args {:FILE file}})
 
 (defn for* [var list & body]
   {:type "bash_for" :args {:VAR var :LIST list :BODY (vec body)}})

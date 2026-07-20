@@ -32,6 +32,17 @@
                          (h/pipe (h/head* (n 2) nil)))
                "Remember to water the plants.\nCall grandma.\n"))
 
+(deftest tail-of-file
+  (equivalent? (h/script (h/run (h/tail* (n 2) (s "notes.txt"))))
+               "Buy milk.\nCall grandma.\n"))
+
+(deftest sort-uniq-count-pipeline
+  (equivalent? (h/script (h/run (h/cat* (s "notes.txt")))
+                         (h/pipe (h/sort* nil))
+                         (h/pipe (h/uniq* nil))
+                         (h/pipe (h/wc-l nil)))
+               "3\n"))
+
 (deftest for-over-seq-with-arith
   (equivalent? (h/script (h/assign "sum" (n 0))
                          (h/for* "i" (h/subst (h/run (h/seq* (n 1) (n 4))))
@@ -116,7 +127,11 @@
             stages (gen/vector
                     (gen/one-of
                      [(gen/fmap #(h/pipe (h/head* % nil)) gen-pos-num)
-                      (gen/fmap #(h/pipe (h/grep* (s %) nil)) gen-word)])
+                      (gen/fmap #(h/pipe (h/tail* % nil)) gen-pos-num)
+                      (gen/fmap #(h/pipe (h/grep* (s %) nil)) gen-word)
+                      (gen/return (h/pipe (h/wc-l nil)))
+                      (gen/return (h/pipe (h/sort* nil)))
+                      (gen/return (h/pipe (h/uniq* nil)))])
                     0 2)]
     (into [source] stages)))
 

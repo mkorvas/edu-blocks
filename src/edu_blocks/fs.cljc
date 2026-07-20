@@ -50,6 +50,32 @@
   (lines->text (filter #(re-find (re-pattern pattern) %)
                        (str/split-lines text))))
 
+(defn tail-text
+  "The last n lines of text, as text."
+  [n text]
+  (if (= text "")
+    ""
+    (lines->text (take-last n (str/split-lines text)))))
+
+(defn wc-l-text
+  "What wc -l prints for text: the number of newline characters."
+  [text]
+  (str (count (re-seq #"\n" text)) "\n"))
+
+(defn sort-text
+  "The lines of text sorted (byte order, like LC_ALL=C sort), as text."
+  [text]
+  (if (= text "")
+    ""
+    (lines->text (sort (str/split-lines text)))))
+
+(defn uniq-text
+  "Text with repeated adjacent lines collapsed, like uniq."
+  [text]
+  (if (= text "")
+    ""
+    (lines->text (dedupe (str/split-lines text)))))
+
 (defn seq-text
   "What seq(1) prints for the inclusive range from..to."
   [from to]

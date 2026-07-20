@@ -22,13 +22,19 @@
 (deftest commands
   (is (= "seq(Number(1), Number(5))" (js/emit (h/seq* (n 1) (n 5)))))
   (is (= "cat(\"notes.txt\")" (js/emit (h/cat* (s "notes.txt")))))
-  (testing "a standalone head/grep reads its file"
+  (testing "a standalone filter command reads its file"
     (is (= "head(Number(2), cat(\"notes.txt\"))"
            (js/emit (h/head* (n 2) (s "notes.txt")))))
     (is (= "grep(\"milk\", cat(\"notes.txt\"))"
-           (js/emit (h/grep* (s "milk") (s "notes.txt"))))))
+           (js/emit (h/grep* (s "milk") (s "notes.txt")))))
+    (is (= "tail(Number(2), cat(\"notes.txt\"))"
+           (js/emit (h/tail* (n 2) (s "notes.txt")))))
+    (is (= "wcl(cat(\"notes.txt\"))" (js/emit (h/wc-l (s "notes.txt")))))
+    (is (= "sort(cat(\"notes.txt\"))" (js/emit (h/sort* (s "notes.txt")))))
+    (is (= "uniq(cat(\"notes.txt\"))" (js/emit (h/uniq* (s "notes.txt"))))))
   (testing "outside a pipe, an empty FILE socket reads the empty string"
-    (is (= "head(Number(2), \"\")" (js/emit (h/head* (n 2) nil))))))
+    (is (= "head(Number(2), \"\")" (js/emit (h/head* (n 2) nil))))
+    (is (= "sort(\"\")" (js/emit (h/sort* nil))))))
 
 (deftest substitution
   (is (= (str "capture(function () {\n"

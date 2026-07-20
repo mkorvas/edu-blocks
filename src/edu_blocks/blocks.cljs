@@ -87,6 +87,35 @@
      :output       "Command"
      :tooltip      "Prints the lines of a file matching a pattern."
      :colour       210}
+    {:type         "bash_tail"
+     :message0     "tail -n %1 %2"
+     :args0        [{:type "input_value" :name "N" :check ["Number" "String"]}
+                    {:type "input_value" :name "FILE" :check "String"}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Prints the last N lines of a file."
+     :colour       210}
+    {:type         "bash_wc_l"
+     :message0     "wc -l %1"
+     :args0        [{:type "input_value" :name "FILE" :check "String"}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Counts the lines of a file."
+     :colour       210}
+    {:type         "bash_sort"
+     :message0     "sort %1"
+     :args0        [{:type "input_value" :name "FILE" :check "String"}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Prints the lines of a file in order."
+     :colour       210}
+    {:type         "bash_uniq"
+     :message0     "uniq %1"
+     :args0        [{:type "input_value" :name "FILE" :check "String"}]
+     :inputsInline true
+     :output       "Command"
+     :tooltip      "Removes repeated neighboring lines; sort first to remove all duplicates."
+     :colour       210}
     {:type              "bash_run"
      :message0          "run %1"
      :args0             [{:type "input_value" :name "CMD" :check "Command"}]

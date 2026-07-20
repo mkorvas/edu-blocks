@@ -107,8 +107,8 @@
 (defmethod emit "bash_seq" [{:keys [args]}]
   (str "seq(Number(" (emit (:FROM args)) "), Number(" (emit (:TO args)) "))"))
 
-;; head and grep take text (not a path); cat wraps a file path into
-;; text, and inside a pipe an empty FILE reads from the previous
+;; The filter commands take text (not a path); cat wraps a file path
+;; into text, and inside a pipe an empty FILE reads from the previous
 ;; stage's stdout.
 (defn- file-source [file stdin]
   (cond
@@ -122,21 +122,41 @@
 (defmethod emit "bash_head" [{:keys [args]}]
   (emit-stage {:type "bash_head" :args args} nil))
 
+(defmethod emit "bash_tail" [{:keys [args]}]
+  (emit-stage {:type "bash_tail" :args args} nil))
+
 (defmethod emit "bash_grep" [{:keys [args]}]
   (emit-stage {:type "bash_grep" :args args} nil))
 
+(defmethod emit "bash_wc_l" [{:keys [args]}]
+  (emit-stage {:type "bash_wc_l" :args args} nil))
+
+(defmethod emit "bash_sort" [{:keys [args]}]
+  (emit-stage {:type "bash_sort" :args args} nil))
+
+(defmethod emit "bash_uniq" [{:keys [args]}]
+  (emit-stage {:type "bash_uniq" :args args} nil))
+
 (defn- emit-stage
   "Emits a Command in a (possibly pipe-) context; when stdin is a JS
-   expression (variable name), head/grep read from it if FILE is empty."
+   expression (variable name), the filter commands read from it if
+   FILE is empty."
   [cmd stdin]
-  (case (:type cmd)
-    "bash_head"
-    (str "head(Number(" (emit (:N (:args cmd))) "), "
-         (file-source (:FILE (:args cmd)) stdin) ")")
-    "bash_grep"
-    (str "grep(" (emit (:PATTERN (:args cmd))) ", "
-         (file-source (:FILE (:args cmd)) stdin) ")")
-    (emit cmd)))
+  (let [source (file-source (:FILE (:args cmd)) stdin)]
+    (case (:type cmd)
+      "bash_head"
+      (str "head(Number(" (emit (:N (:args cmd))) "), " source ")")
+      "bash_tail"
+      (str "tail(Number(" (emit (:N (:args cmd))) "), " source ")")
+      "bash_grep"
+      (str "grep(" (emit (:PATTERN (:args cmd))) ", " source ")")
+      "bash_wc_l"
+      (str "wcl(" source ")")
+      "bash_sort"
+      (str "sort(" source ")")
+      "bash_uniq"
+      (str "uniq(" source ")")
+      (emit cmd))))
 
 (defmethod emit "bash_run" [{:keys [args]}]
   (if (some? (:CMD args))

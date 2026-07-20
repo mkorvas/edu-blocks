@@ -20,9 +20,25 @@ function head(n, text) {
   if (text === '') return '';
   return linesToText(splitLines(text).slice(0, n));
 }
+function tail(n, text) {
+  if (text === '') return '';
+  const lines = splitLines(text);
+  return linesToText(lines.slice(Math.max(0, lines.length - n)));
+}
 function grep(pattern, text) {
   const re = new RegExp(pattern);
   return linesToText(splitLines(text).filter((l) => re.test(l)));
+}
+function wcl(text) {
+  return String((text.match(/\n/g) || []).length) + '\n';
+}
+function sort(text) {
+  if (text === '') return '';
+  return linesToText(splitLines(text).sort());
+}
+function uniq(text) {
+  if (text === '') return '';
+  return linesToText(splitLines(text).filter((l, i, ls) => i === 0 || l !== ls[i - 1]));
 }
 function seq(from, to) {
   const out = [];
@@ -45,6 +61,7 @@ const capture = (f) => {
 };
 
 const code = fs.readFileSync(process.argv[2], 'utf8');
-new Function('console', 'process', 'cat', 'head', 'grep', 'seq', 'capture', code)(
-  sandboxConsole, sandboxProcess, cat, head, grep, seq, capture);
+new Function('console', 'process', 'cat', 'head', 'tail', 'grep',
+             'wcl', 'sort', 'uniq', 'seq', 'capture', code)(
+  sandboxConsole, sandboxProcess, cat, head, tail, grep, wcl, sort, uniq, seq, capture);
 process.stdout.write(bufs[0]);

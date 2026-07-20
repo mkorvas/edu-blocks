@@ -28,14 +28,15 @@
                 :expected "42\n"
                 :requires #{"bash_arith"}}}
    {:id 4 :label "Files"
-    :description "Look into files with cat, head and grep."
-    :blocks #{"bash_cat" "bash_head" "bash_grep" "bash_seq"}
+    :description "Look into files with cat, head, tail, grep and wc."
+    :blocks #{"bash_cat" "bash_head" "bash_tail" "bash_grep" "bash_wc_l"
+              "bash_seq"}
     :challenge {:task     "Print the first 2 lines of /home/alice/notes.txt."
                 :expected "Remember to water the plants.\nBuy milk.\n"
                 :requires #{"bash_head"}}}
    {:id 5 :label "Pipelines"
-    :description "Send one command's output on to another."
-    :blocks #{"bash_pipe"}
+    :description "Send one command's output on to another; tidy lines with sort and uniq."
+    :blocks #{"bash_pipe" "bash_sort" "bash_uniq"}
     :challenge {:task     "Using a pipeline, print only the line of /home/alice/notes.txt that mentions milk."
                 :expected "Buy milk.\n"
                 :requires #{"bash_pipe"}}}
@@ -104,8 +105,14 @@
                 :type   "bash_head"
                 :inputs {:N {:shadow {:type "bash_number" :fields {:NUM 2}}}}}
                {:kind   "block"
+                :type   "bash_tail"
+                :inputs {:N {:shadow {:type "bash_number" :fields {:NUM 2}}}}}
+               {:kind   "block"
                 :type   "bash_grep"
                 :inputs {:PATTERN {:shadow {:type "bash_string" :fields {:TEXT "milk"}}}}}
+               {:kind "block" :type "bash_wc_l"}
+               {:kind "block" :type "bash_sort"}
+               {:kind "block" :type "bash_uniq"}
                {:kind   "block"
                 :type   "bash_seq"
                 :inputs {:FROM {:shadow {:type "bash_number" :fields {:NUM 1}}}

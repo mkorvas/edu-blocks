@@ -82,7 +82,11 @@
         process #js {:stdout #js {:write (fn [x] (append! x))}}
         cat     (fn [path] (file-text fs-tree "cat" path))
         head    (fn [n text] (fs/head-text n text))
+        tail    (fn [n text] (fs/tail-text n text))
         grep    (fn [pattern text] (fs/grep-text pattern text))
+        wcl     (fn [text] (fs/wc-l-text text))
+        sort*   (fn [text] (fs/sort-text text))
+        uniq    (fn [text] (fs/uniq-text text))
         seq*    (fn [from to] (fs/seq-text from to))
         capture (fn [f]
                   (swap! bufs conj "")
@@ -92,8 +96,9 @@
                     (finally
                       (swap! bufs pop))))]
     (try
-      ((js/Function. "console" "process" "cat" "head" "grep" "seq" "capture" code)
-       console process cat head grep seq* capture)
+      ((js/Function. "console" "process" "cat" "head" "tail" "grep"
+                     "wcl" "sort" "uniq" "seq" "capture" code)
+       console process cat head tail grep wcl sort* uniq seq* capture)
       (catch :default e
         (append! (str "Error: " (ex-message e)))))
     (first @bufs)))

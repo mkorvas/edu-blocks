@@ -37,9 +37,9 @@
    {:id 5 :label "Pipelines"
     :description "Send one command's output on to another; tidy lines with sort and uniq."
     :blocks #{"bash_pipe" "bash_sort" "bash_uniq"}
-    :challenge {:task     "Using a pipeline, print only the line of /home/alice/notes.txt that mentions milk."
-                :expected "Buy milk.\n"
-                :requires #{"bash_pipe"}}}
+    :challenge {:task     "Using a pipeline, print the lines of /home/alice/notes.txt in alphabetical order."
+                :expected "Buy milk.\nCall grandma.\nRemember to water the plants.\n"
+                :requires #{"bash_pipe" "bash_sort"}}}
    {:id 6 :label "Command output"
     :description "Use a command's output as a value."
     :blocks #{"bash_subst" "bash_subst_str" "bash_word_list"}

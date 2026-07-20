@@ -15,7 +15,7 @@
    3 (h/script (h/run (h/echo (h/arith (n 6) "MUL" (n 7)))))
    4 (h/script (h/run (h/head* (n 2) (s "notes.txt"))))
    5 (h/script (h/run (h/cat* (s "notes.txt")))
-               (h/pipe (h/grep* (s "milk") nil)))
+               (h/pipe (h/sort* nil)))
    6 (h/script (h/run (h/echo (h/subst-str (h/run (h/seq* (n 1) (n 3)))))))
    7 (h/script (h/for* "i" (h/subst (h/run (h/seq* (n 1) (n 5))))
                        (h/run (h/echo (v "i")))))

@@ -119,6 +119,16 @@
          (indent then)
          "\nfi")))
 
+(defmethod emit "bash_if_else" [{:keys [args]}]
+  (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")
+        then (if (seq (:THEN args)) (emit-stmts (:THEN args)) ":")
+        else (if (seq (:ELSE args)) (emit-stmts (:ELSE args)) ":")]
+    (str "if " cond "; then\n"
+         (indent then)
+         "\nelse\n"
+         (indent else)
+         "\nfi")))
+
 (defmethod emit "bash_compare" [{:keys [args]}]
   (let [op (case (:OP args) "NEQ" "!=" "=")]
     (str "[ " (emit (:A args)) " " op " " (emit (:B args)) " ]")))

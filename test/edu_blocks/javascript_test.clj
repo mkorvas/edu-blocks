@@ -70,7 +70,15 @@
                           (h/run (h/echo (v "i")))))))
   (is (= "if (String(x) === String(\"hi\")) {\n  process.stdout.write((String(\"yes\") + \"\\n\"));\n}"
          (js/emit (h/if* (h/cmp (v "x") "EQ" (s "hi"))
-                         (h/run (h/echo (s "yes"))))))))
+                         (h/run (h/echo (s "yes")))))))
+  (is (= (str "if (String(x) === String(\"hi\")) {\n"
+              "  process.stdout.write((String(\"yes\") + \"\\n\"));\n"
+              "} else {\n"
+              "  process.stdout.write((String(\"no\") + \"\\n\"));\n"
+              "}")
+         (js/emit (h/if-else (h/cmp (v "x") "EQ" (s "hi"))
+                             [(h/run (h/echo (s "yes")))]
+                             [(h/run (h/echo (s "no")))])))))
 
 (deftest comparisons
   (is (= "String(\"a\") !== String(\"b\")" (js/emit (h/cmp (s "a") "NEQ" (s "b")))))

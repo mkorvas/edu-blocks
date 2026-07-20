@@ -54,7 +54,7 @@
                 :requires #{"bash_for"}}}
    {:id 8 :label "Decisions"
     :description "Run steps only when a test passes."
-    :blocks #{"bash_if" "bash_compare" "bash_compare_num"}
+    :blocks #{"bash_if" "bash_if_else" "bash_compare" "bash_compare_num"}
     :challenge {:task     "Print only the numbers from 1 to 5 that are greater than 3."
                 :expected "4\n5\n"
                 :requires #{"bash_if" "bash_compare_num"}}}
@@ -149,6 +149,7 @@
                                                                                         :fields {:VAR "i"}}}}}}}}}}}]}
    {:name "Decisions" :colour 60
     :contents [{:kind "block" :type "bash_if"}
+               {:kind "block" :type "bash_if_else"}
                {:kind "block" :type "bash_compare"}
                {:kind "block" :type "bash_compare_num"}]}
    {:name "Functions" :colour 290

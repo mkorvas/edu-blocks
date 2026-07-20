@@ -140,6 +140,16 @@
      :previousStatement "Stmt"
      :nextStatement     "Stmt"
      :colour            60}
+    {:type              "bash_if_else"
+     :message0          "if %1"
+     :args0             [{:type "input_value" :name "COND" :check "Condition"}]
+     :message1          "then %1"
+     :args1             [{:type "input_statement" :name "THEN" :check "Stmt"}]
+     :message2          "else %1"
+     :args2             [{:type "input_statement" :name "ELSE" :check "Stmt"}]
+     :previousStatement "Stmt"
+     :nextStatement     "Stmt"
+     :colour            60}
     {:type         "bash_compare"
      :message0     "%1 %2 %3 %4"
      :args0        [{:type "input_value" :name "A" :check "String"}

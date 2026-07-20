@@ -63,6 +63,15 @@
   (is (= "if [ \"$x\" = \"hi\" ]; then\n  echo \"yes\"\nfi"
          (bash/emit (h/if* (h/cmp (v "x") "EQ" (s "hi"))
                            (h/run (h/echo (s "yes")))))))
+  (is (= "if [ \"$x\" = \"hi\" ]; then\n  echo \"yes\"\nelse\n  echo \"no\"\nfi"
+         (bash/emit (h/if-else (h/cmp (v "x") "EQ" (s "hi"))
+                               [(h/run (h/echo (s "yes")))]
+                               [(h/run (h/echo (s "no")))]))))
+  (testing "an empty else branch emits a no-op"
+    (is (= "if [ \"$x\" = \"hi\" ]; then\n  echo \"yes\"\nelse\n  :\nfi"
+           (bash/emit (h/if-else (h/cmp (v "x") "EQ" (s "hi"))
+                                 [(h/run (h/echo (s "yes")))]
+                                 [])))))
   (testing "empty bodies emit a no-op"
     (is (= "for i in \"a\"; do\n  :\ndone"
            (bash/emit (h/for* "i" (h/word-list (s "a"))))))))

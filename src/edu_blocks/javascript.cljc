@@ -176,6 +176,14 @@
          (indent then)
          "\n}")))
 
+(defmethod emit "bash_if_else" [{:keys [args]}]
+  (let [cond (if (some? (:COND args)) (emit (:COND args)) "false")]
+    (str "if (" cond ") {\n"
+         (indent (emit-stmts (:THEN args)))
+         "\n} else {\n"
+         (indent (emit-stmts (:ELSE args)))
+         "\n}")))
+
 (defmethod emit "bash_compare" [{:keys [args]}]
   ;; Bash [ = ] compares strings, so coerce both sides to keep the
   ;; two languages in agreement (e.g. a numeric loop var vs "3").

@@ -25,6 +25,7 @@
    "bash_run"       {:inputs [:CMD]}
    "bash_pipe"      {:inputs [:CMD]}
    "bash_if"          {:inputs [:COND] :stmts [:THEN]}
+   "bash_if_else"     {:inputs [:COND] :stmts [:THEN :ELSE]}
    "bash_compare"     {:fields [:OP] :inputs [:A :B]}
    "bash_number"      {:fields [:NUM]}
    "bash_compare_num" {:fields [:OP] :inputs [:A :B]}

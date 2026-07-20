@@ -58,6 +58,13 @@
                                 (h/run (h/echo (s "eight")))))
                "big\n"))
 
+(deftest if-else-takes-both-branches
+  (equivalent? (h/script (h/for* "i" (h/subst (h/run (h/seq* (n 1) (n 4))))
+                                 (h/if-else (h/cmp-num (v "i") "GT" (n 2))
+                                            [(h/run (h/echo (s "big")))]
+                                            [(h/run (h/echo (s "small")))])))
+               "small\nsmall\nbig\nbig\n"))
+
 (deftest division-truncates-toward-zero
   (equivalent? (h/script (h/run (h/echo (h/arith (n -7) "DIV" (n 2))))
                          (h/run (h/echo (h/arith (n 7) "MOD" (n 3)))))
@@ -167,8 +174,13 @@
         :if
         (gen/let [cond gen-condition
                   then (gen-stmts env (dec depth) 2)
+                  else (gen/one-of [(gen/return nil)
+                                    (gen-stmts env (dec depth) 2)])
                   more (gen-stmts env depth (dec n))]
-          (into [(apply h/if* cond then)] more))
+          (into [(if (some? else)
+                   (h/if-else cond then else)
+                   (apply h/if* cond then))]
+                more))
 
         :for
         (gen/let [var (gen/elements ["i" "j"])

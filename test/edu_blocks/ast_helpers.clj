@@ -32,6 +32,8 @@
   {:type "bash_for" :args {:VAR var :LIST list :BODY (vec body)}})
 (defn if* [cond & then]
   {:type "bash_if" :args {:COND cond :THEN (vec then)}})
+(defn if-else [cond then else]
+  {:type "bash_if_else" :args {:COND cond :THEN (vec then) :ELSE (vec else)}})
 
 (defn cmp [a op b] {:type "bash_compare" :args {:A a :OP op :B b}})
 (defn cmp-num [a op b] {:type "bash_compare_num" :args {:A a :OP op :B b}})

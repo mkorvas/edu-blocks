@@ -1,6 +1,8 @@
 This project uses the Blockly library to create a block-oriented 
 programming UI for use in education.
 
+**Live app:** https://mkorvas.github.io/edu-blocks/
+
 To launch the backend REPL:
 ```
 clj -M:backend

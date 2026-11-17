@@ -18,6 +18,7 @@
     :grid     {:spacing 20 :length 3 :colour "#ccc" :snap true}
     :zoom     {:controls true}
     :trashcan true
+    :sounds   false
     :plugins  {:connectionPreviewer
                (b-dyna/decoratePreviewer b/InsertionMarkerPreviewer)}}))
 

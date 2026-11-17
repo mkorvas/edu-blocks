@@ -11,14 +11,12 @@
     :app
     {
       :init-fn edu-blocks.core/init!
-      :preloads [devtools.preload
-                 day8.re-frame-10x.preload.react-18
-                 ]
     }
    }
    :devtools
    {:http-port 8031
-    :preloads [devtools.preload]
+    :preloads [devtools.preload
+               day8.re-frame-10x.preload.react-18]
     :reload-strategy :full
     :ignore-warnings true ;; To ignore lint warnings for some type-uncheckable code.
     :watch-dir "resources/public/src"
@@ -38,4 +36,10 @@
        }
      }
    }}
+   :release
+   {:compiler-options
+    {:closure-defines
+     {re-frame.trace.trace-enabled?        false
+      day8.re-frame.tracing.trace-enabled? false
+      }}}
 }}}

@@ -20,8 +20,9 @@
    7 (h/script (h/for* "i" (h/subst (h/run (h/seq* (n 1) (n 5))))
                        (h/run (h/echo (v "i")))))
    8 (h/script (h/for* "i" (h/subst (h/run (h/seq* (n 1) (n 5))))
-                       (h/if* (h/cmp-num (v "i") "GT" (n 3))
-                              (h/run (h/echo (v "i"))))))
+                       (h/if-else (h/cmp-num (v "i") "GT" (n 3))
+                                  [(h/run (h/echo (s "big")))]
+                                  [(h/run (h/echo (s "small")))])))
    9 (h/script (h/func-def "twice" (h/arg-list "x")
                            (h/run (h/echo (v "x")))
                            (h/run (h/echo (v "x"))))

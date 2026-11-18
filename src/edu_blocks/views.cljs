@@ -3,7 +3,7 @@
    ["blockly" :as b]
    ["@blockly/block-dynamic-connection" :as b-dyna]
    [clojure.string :as str]
-   [re-com.core :refer [button h-box horizontal-bar-tabs single-dropdown]]
+   [re-com.core :refer [button h-box single-dropdown]]
    [re-frame.core :as rf]
    [reagent.core :as r]
 
@@ -121,50 +121,65 @@
   [{:id :bash :label "Bash"}
    {:id :js   :label "JavaScript"}])
 
-(defn output-panel []
-  (let [lang @(rf/subscribe [::subs/lang])
-        code @(rf/subscribe [::subs/code-output])]
-    [:div {:style {:flex           "0 0 300px"
-                   :height         "100%"
-                   :display        "flex"
-                   :flex-direction "column"
-                   :background     "#1e1e1e"}}
-     [:div {:style {:padding "8px"}}
-      [horizontal-bar-tabs
-       :model     lang
-       :tabs      langs
-       :on-change #(rf/dispatch [::ev/set-lang %])]]
-     [:pre {:style {:margin      0
-                    :padding     "12px"
-                    :flex        "1 1 auto"
-                    :overflow-y  "auto"
-                    :color       "#d4d4d4"
-                    :font-family "monospace"
-                    :white-space "pre"}}
-      (or code (case lang
-                 :js "// Drop a script block\n// to get started"
-                 "# Drop a script block\n# to get started"))]]))
+(defn- lang-switch [lang]
+  [:div {:class "btn-group btn-group-sm" :role "group"}
+   (for [{:keys [id label]} langs]
+     [:button {:key      (name id)
+               :type     "button"
+               :class    (str "btn btn-outline-light"
+                              (when (= id lang) " active"))
+               :on-click #(rf/dispatch [::ev/set-lang id])}
+      label])])
 
-(defn exec-panel []
-  (let [output @(rf/subscribe [::subs/exec-output])]
-    [:div {:style {:flex           "0 0 300px"
+(defn right-panel []
+  (let [lang   @(rf/subscribe [::subs/lang])
+        code   @(rf/subscribe [::subs/code-output])
+        output @(rf/subscribe [::subs/exec-output])]
+    [:div {:style {:flex           "0 0 400px"
                    :height         "100%"
                    :display        "flex"
-                   :flex-direction "column"
-                   :background     "#000"}}
-     [:div {:style {:padding "8px"}}
-      [button
-       :label    "Run JS"
-       :class    "btn-primary"
-       :on-click #(rf/dispatch [::ev/run-script])]]
-     [:pre {:style {:margin      0
-                    :padding     "12px"
-                    :flex        "1 1 auto"
-                    :overflow-y  "auto"
-                    :color       "#9f9"
-                    :font-family "monospace"
-                    :white-space "pre-wrap"}}
-      (or output "")]]))
+                   :flex-direction "column"}}
+     [:div {:style {:flex           "3 1 0"
+                    :min-height     0
+                    :display        "flex"
+                    :flex-direction "column"
+                    :background     "#1e1e1e"}}
+      [:div {:style {:padding    "8px 12px"
+                     :flex-shrink 0}}
+       [lang-switch lang]]
+      [:pre {:style {:margin      0
+                     :padding     "0 12px 12px"
+                     :flex        "1 1 auto"
+                     :overflow-y  "auto"
+                     :color       "#d4d4d4"
+                     :font-family "monospace"
+                     :white-space "pre"}}
+       (or code (case lang
+                  :js "// Drop a script block\n// to get started"
+                  "# Drop a script block\n# to get started"))]]
+     [:div {:style {:flex           "2 1 0"
+                    :min-height     0
+                    :display        "flex"
+                    :flex-direction "column"
+                    :background     "#0a0a0a"
+                    :border-top     "2px solid #333"}}
+      [:div {:style {:padding     "8px 12px"
+                     :flex-shrink 0}}
+       [:button {:class    "btn btn-sm btn-success"
+                 :style    {:border-radius "20px"
+                            :padding-left  "14px"
+                            :padding-right "14px"}
+                 :on-click #(rf/dispatch [::ev/run-script])}
+        [:i {:class "zmdi zmdi-play" :style {:margin-right "5px"}}]
+        "Run"]]
+      [:pre {:style {:margin      0
+                     :padding     "0 12px 12px"
+                     :flex        "1 1 auto"
+                     :overflow-y  "auto"
+                     :color       "#9f9"
+                     :font-family "monospace"
+                     :white-space "pre-wrap"}}
+       (or output "")]]]))
 
 (defn- tree-node [node]
   (if (= :dir (:type node))
@@ -228,6 +243,5 @@
   [h-box
    :style {:height "100vh" :width "100%"}
    :children [[blockly-pane]
-              [output-panel]
-              [exec-panel]
+              [right-panel]
               [files-panel]]])
